@@ -48,8 +48,47 @@ export async function GET(request: NextRequest) {
     }
 
     // Procesa la respuesta exitosa
-    const data = await response.json();
-    console.log("Successful response:", data);
+    let data;
+    try {
+      const text = await response.text();
+      console.log("Raw response:", text);
+      
+      // Si la respuesta está vacía, devuelve un objeto con transactionId
+      if (!text || text.trim() === '') {
+        data = { transactionId: transactionId, message: "No details available" };
+      } else {
+        try {
+          data = JSON.parse(text);
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError);
+          // Si hay un error al parsear, devuelve un objeto con los datos en bruto
+          data = { 
+            transactionId: transactionId, 
+            rawResponse: text,
+            parseError: "Could not parse response as JSON"
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Error reading response:", error);
+      return NextResponse.json(
+        { 
+          error: "Failed to read API response", 
+          details: error instanceof Error ? error.message : "Unknown error" 
+        },
+        { status: 500 }
+      );
+    }
+
+    // Si data es null o undefined, proporciona un objeto de fallback
+    if (!data) {
+      data = { 
+        transactionId: transactionId, 
+        message: "No data returned from API" 
+      };
+    }
+    
+    console.log("Processed response data:", data);
     return NextResponse.json(data);
   } catch (error) {
     // Captura cualquier error no manejado
@@ -57,7 +96,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         error: "Failed to retrieve order details", 
-        details: error.message || "Unknown error" 
+        details: error instanceof Error ? error.message : "Unknown error" 
       },
       { status: 500 }
     );
