@@ -21,7 +21,7 @@ export default function Header() {
         
         <div className="flex items-center space-x-4">
           <a 
-            href="https://github.com/your-repo" 
+            href="https://github.com/pablofelipe01/sylicon-kravata" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
