@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./components/ui";
 import { initializeMarketplaceData } from "./lib/initialize-data";
+import FAQ from "./components/FAQ";
 
 export default function HomePage() {
   // Inicializar datos al cargar la página
@@ -48,15 +49,15 @@ export default function HomePage() {
           <div className="lg:w-1/2 flex justify-center">
             <div className="relative w-full max-w-md">
               <Image
-                src="/Token1.webp"
+                src="/imagen1.png"
                 alt="Propiedad tokenizada"
                 width={500}
                 height={500}
                 className="rounded-lg shadow-2xl"
               />
               <div className="absolute -bottom-5 -right-5 bg-blue-600 text-white p-4 rounded-lg shadow-lg">
-                <p className="text-lg font-bold">28 Tokens</p>
-                <p className="text-sm">Disponibles ahora</p>
+                <p className="text-lg font-bold">Tokens</p>
+                <p className="text-sm">Disponibles</p>
               </div>
             </div>
           </div>
@@ -116,6 +117,9 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+      
+      {/* FAQ Section */}
+      <FAQ />
     </div>
   );
 }

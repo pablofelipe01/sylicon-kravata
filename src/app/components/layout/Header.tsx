@@ -18,14 +18,14 @@ export default function Header() {
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
             <Image
-              src="/logo.png"
+              src="/logo2.png"
               alt="Sylicon Logo"
-              width={40}
-              height={40}
+              width={200}  // Aumentado de 40 a 60
+              height={200} // Aumentado de 40 a 60
               priority
               className="mr-3"
             />
-            <span className="text-xl font-bold text-white">Sylicon Marketplace</span>
+            {/* <span className="text-xl font-bold text-white">Sylicon Marketplace</span> */}
           </Link>
         </div>
         
@@ -33,7 +33,7 @@ export default function Header() {
         <button 
           className="md:hidden text-gray-300 hover:text-white"
           onClick={toggleMenu}
-          aria-label="Menú"
+          aria-label="Menu"
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
