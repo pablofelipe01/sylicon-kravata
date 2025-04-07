@@ -1,3 +1,4 @@
+// En /api/kravata/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 // Handler for POST formkyc endpoint
@@ -9,6 +10,8 @@ export async function POST(request: NextRequest) {
     if (!externalId) {
       return NextResponse.json({ error: "externalId is required" }, { status: 400 });
     }
+
+    console.log(`Solicitando formulario KYC para externalId: ${externalId}`);
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/compliance/onboarding/formkyc`,
@@ -22,6 +25,8 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    console.log(`Respuesta de Kravata FormKYC API: ${response.status}`);
+
     if (!response.ok) {
       return NextResponse.json(
         { error: `API request failed with status ${response.status}` },
@@ -30,9 +35,10 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
+    console.log("Datos de formulario KYC:", data);
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error calling Kravata API:", error);
+    console.error("Error calling Kravata API for formkyc:", error);
     return NextResponse.json(
       { error: "Failed to process request" },
       { status: 500 }
@@ -50,6 +56,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "externalId is required" }, { status: 400 });
     }
 
+    console.log(`Verificando estado KYC para externalId: ${externalId}`);
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/compliance/onboarding/status?externalId=${externalId}`,
       {
@@ -60,6 +68,8 @@ export async function GET(request: NextRequest) {
       }
     );
 
+    console.log(`Respuesta de Kravata Status API: ${response.status}`);
+
     if (!response.ok) {
       return NextResponse.json(
         { error: `API request failed with status ${response.status}` },
@@ -68,9 +78,22 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    console.log("Datos completos de Kravata status:", JSON.stringify(data, null, 2));
+    
+    // Mapear campos para mantener consistencia con lo que espera el frontend
+    const mappedData = {
+      ...data,
+      status: data.complianceStatus // Añadir campo status basado en complianceStatus
+    };
+    
+    // Mapeo adicional para tipos de estado específicos si es necesario
+    if (mappedData.status === "approved") {
+      mappedData.status = "completed";
+    }
+    
+    return NextResponse.json(mappedData);
   } catch (error) {
-    console.error("Error calling Kravata API:", error);
+    console.error("Error calling Kravata API for status:", error);
     return NextResponse.json(
       { error: "Failed to process request" },
       { status: 500 }

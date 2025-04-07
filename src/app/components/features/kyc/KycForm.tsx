@@ -10,22 +10,33 @@ interface KycFormProps {
 }
 
 export default function KycForm({ onSuccess, onError }: KycFormProps) {
-  const [externalId, setExternalId] = useState("test-user-001");
+  // Cambia el valor inicial a cadena vacía para que el usuario lo ingrese
+  const [externalId, setExternalId] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar que externalId no esté vacío
+    if (!externalId || externalId.trim() === "") {
+      onError("Por favor, ingresa un External ID");
+      return;
+    }
+    
     setLoading(true);
     
     try {
+      console.log("Enviando solicitud con externalId:", externalId); // Agregar log
       const data = await getKycForm(externalId);
+      console.log("Respuesta recibida:", data); // Agregar log
       onSuccess(data);
       
       if (data.kycLink) {
         window.open(data.kycLink, '_blank');
       }
     } catch (err) {
-      onError(err instanceof Error ? err.message : 'An unknown error occurred');
+      console.error("Error en KycForm:", err); // Agregar log
+      onError(err instanceof Error ? err.message : 'Ocurrió un error desconocido');
     } finally {
       setLoading(false);
     }
@@ -38,6 +49,7 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
         label="External ID:"
         value={externalId}
         onChange={(e) => setExternalId(e.target.value)}
+        placeholder="Ingresa un External ID para registrarte"
         required
       />
       
@@ -47,7 +59,7 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
         fullWidth
         loading={loading}
       >
-        Get KYC Form
+        Obtener Formulario KYC
       </Button>
     </form>
   );

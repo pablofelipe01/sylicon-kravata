@@ -1,24 +1,33 @@
 "use client";
 
-import { useState } from 'react';
-import { Input, Button } from '../ui'; // Corregido: Cambiado de '../components/ui' a '../../ui'
-import { useAuth } from '../../contexts/AuthContext'; // También necesita ajustarse
+import { useState, useEffect } from 'react';
+import { Input, Button } from '../components/ui';
+import { useAuth } from '../contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function LoginModal({ isOpen, onClose }) {
+export default function LoginPage() {
   const [externalId, setExternalId] = useState('');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const router = useRouter();
 
-  const handleLogin = async (e) => {
+  // Si el usuario ya está logueado, redirigir a la página principal
+  useEffect(() => {
+    if (user?.isLoggedIn) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     
     try {
       await login(externalId);
-      onClose();
+      router.push('/dashboard');
     } catch (err) {
       setError('ID no válido. Por favor, verifica e intenta de nuevo.');
     } finally {
@@ -26,12 +35,10 @@ export default function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-white">Iniciar Sesión</h2>
+    <div className="container mx-auto px-4 py-12">
+      <div className="max-w-md mx-auto bg-gray-800 rounded-lg shadow-lg p-6">
+        <h1 className="text-2xl font-bold mb-6 text-white">Iniciar Sesión</h1>
         
         {error && (
           <div className="mb-4 p-3 bg-red-900/30 border border-red-800 rounded text-red-300 text-sm">
@@ -50,7 +57,6 @@ export default function LoginModal({ isOpen, onClose }) {
               onChange={(e) => setExternalId(e.target.value)}
               placeholder="Ingresa tu External ID"
               required
-              className="w-full"
             />
             <p className="mt-2 text-sm text-gray-400">
               Este ID es proporcionado por Kravata después del proceso KYC.
@@ -76,7 +82,7 @@ export default function LoginModal({ isOpen, onClose }) {
             </p>
           </div>
           
-          <div className="mt-6 flex flex-col gap-4">
+          <div className="mt-6">
             <Button 
               type="submit"
               variant="primary"
@@ -85,28 +91,28 @@ export default function LoginModal({ isOpen, onClose }) {
             >
               Iniciar Sesión
             </Button>
-            
-            <div className="text-center">
-              <p className="text-gray-400 text-sm mb-2">¿No tienes una cuenta?</p>
-              <Link 
-                href="/kyc-registration" 
-                className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                onClick={onClose}
-              >
-                Completa el proceso KYC para obtener tu ID
-              </Link>
-            </div>
           </div>
         </form>
         
-        <div className="mt-6 border-t border-gray-700 pt-4">
-          <Button 
-            variant="secondary"
-            onClick={onClose}
-            fullWidth
+        <div className="mt-8 text-center">
+          <p className="text-gray-400 text-sm mb-2">¿No tienes una cuenta?</p>
+          <Link 
+            href="/kyc-registration" 
+            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
           >
-            Cancelar
-          </Button>
+            Completa el proceso KYC para obtener tu ID
+          </Link>
+        </div>
+        
+        <div className="mt-8 pt-4 border-t border-gray-700">
+          <Link href="/">
+            <Button 
+              variant="secondary"
+              fullWidth
+            >
+              Volver al Inicio
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
