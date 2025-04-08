@@ -7,7 +7,7 @@ import {
   getActiveOffers, 
   Token, 
   Offer,
-  createOrder,
+  createOrder as createSupabaseOrder,
   updateOfferStatus
 } from "../lib/supabase";
 import { initializeMarketplaceData } from "../lib/initialize-data";
@@ -15,6 +15,8 @@ import TokenCard from "../components/marketplace/TokenCard";
 import BuyTokenModal from "../components/marketplace/BuyTokenModal";
 import { Button, Card } from "../components/ui";
 import { useAuth } from "../contexts/AuthContext";
+import { createOrder } from "../lib/api"; // Importar createOrder desde api.ts para Kravata
+import { CreateOrderRequest } from "../types";
 
 export default function MarketplacePage() {
   const { user, refreshBalance } = useAuth();
@@ -85,36 +87,66 @@ export default function MarketplacePage() {
     setBuyModalOpen(true);
   };
   
-  // Procesar la compra
-  const handleProcessPurchase = async (offerId: string, quantity: number) => {
+  // Procesar la compra - VERSIÓN ACTUALIZADA
+  const handleProcessPurchase = async (offerId: string, quantity: number): Promise<string> => {
     if (!selectedOffer || !user.externalId || !user.walletId) {
-      setError("Debes iniciar sesión para comprar tokens");
-      return;
+      throw new Error("Debes iniciar sesión para comprar tokens");
     }
     
     try {
-      // Calcular precio total
-      const totalPrice = quantity * selectedOffer.price_per_token;
+      // Obtener detalles de la oferta
+      if (!selectedOffer.token || !selectedOffer.seller) {
+        throw new Error("Información de oferta incompleta");
+      }
       
-      // Crear orden
-      const order = await createOrder({
+      // Comprobar si hay suficientes tokens disponibles
+      if (selectedOffer.quantity < quantity) {
+        throw new Error('No hay suficientes tokens disponibles');
+      }
+      
+      // Preparar datos para la orden en Kravata
+      const orderData: CreateOrderRequest = {
+        amount: selectedOffer.price_per_token * quantity,
+        token: selectedOffer.token.symbol || 'SYL',
+        methodPay: 'PSE', // Usar PSE como método de pago
+        recipientId: user.externalId,
+        recipientWalletId: user.walletId || '',
+        tokensReceived: quantity,
+        sellers: [
+          {
+            walletId: selectedOffer.seller.wallet_id || '',
+            externalId: selectedOffer.seller.external_id,
+            tokensSold: quantity,
+            pricePerToken: selectedOffer.price_per_token
+          }
+        ]
+      };
+      
+      // Crear la orden en Kravata
+      const kravataOrderResponse = await createOrder(orderData);
+      
+      // Crear registro de la orden en Supabase
+      await createSupabaseOrder({
         buyer_external_id: user.externalId,
         buyer_wallet_id: user.walletId,
         offer_id: offerId,
         quantity,
-        total_price: totalPrice,
-        status: 'pending'
+        total_price: selectedOffer.price_per_token * quantity,
+        status: 'pending',
+        transaction_id: kravataOrderResponse.transactionId
       });
       
-      // Actualizar oferta (restar cantidad vendida o marcar como vendida)
-      const updatedQuantity = selectedOffer.quantity - quantity;
+      // Actualizar la cantidad de tokens disponibles en la oferta
+      const newQuantity = selectedOffer.quantity - quantity;
       
-      if (updatedQuantity <= 0) {
+      if (newQuantity <= 0) {
         // Marcar oferta como vendida si no quedan tokens
         await updateOfferStatus(offerId, 'sold');
         // Actualizar ofertas en el estado
         setOffers(prev => prev.filter(o => o.id !== offerId));
       } else {
+        // Actualizar cantidad en la oferta
+        await updateOfferStatus(offerId, 'active', newQuantity);
         // Recargar todas las ofertas
         const updatedOffers = await getActiveOffers();
         setOffers(updatedOffers);
@@ -125,12 +157,15 @@ export default function MarketplacePage() {
         await refreshBalance();
       }
       
-      // Mensaje de éxito (podría implementarse un toast o notificación)
-      alert("¡Compra realizada con éxito! ID de transacción: " + order.id);
+      // Cerrar el modal
+      setBuyModalOpen(false);
+      
+      // Devolver el ID de transacción para su uso con PSE
+      return kravataOrderResponse.transactionId;
       
     } catch (err) {
       console.error("Error processing purchase:", err);
-      setError("Error al procesar la compra");
+      throw new Error(err instanceof Error ? err.message : "Error al procesar la compra");
     }
   };
   
@@ -186,15 +221,14 @@ export default function MarketplacePage() {
               if (tokenOffers.length === 0) return null;
               
               return (
-                // Solo modificamos la llamada al componente TokenCard
-<TokenCard
-  key={token.id}
-  token={token}
-  offers={tokenOffers}
-  isOwner={isTokenOwner(token.token_address)}
-  onBuy={handleBuyToken}
-  view="marketplace" // Especificamos explícitamente que estamos en el marketplace
-/>
+                <TokenCard
+                  key={token.id}
+                  token={token}
+                  offers={tokenOffers}
+                  isOwner={isTokenOwner(token.token_address)}
+                  onBuy={handleBuyToken}
+                  view="marketplace" // Especificamos explícitamente que estamos en el marketplace
+                />
               );
             })}
           </div>

@@ -5,7 +5,8 @@ import {
   TransactionHistory,
   CreateOrderRequest,
   CreateOrderResponse,
-  OrderDetail
+  OrderDetail,
+  PseUrlResponse
 } from '../types';
 
 /**
@@ -164,5 +165,23 @@ export async function createOrder(orderData: CreateOrderRequest): Promise<Create
   return fetchAPI<CreateOrderResponse>('/api/kravata/order', {
     method: 'POST',
     body: JSON.stringify(orderData),
+  });
+}
+
+/**
+ * Obtiene la URL de pago PSE para una transacción específica
+ * @param transactionId ID de la transacción para la cual obtener la URL de PSE
+ * @returns Objeto con la URL de PSE
+ */
+export async function getPseUrl(transactionId: string): Promise<PseUrlResponse> {
+  console.log('Solicitando URL de PSE para transacción:', transactionId);
+  
+  // Validación del parámetro
+  if (!transactionId || transactionId.trim() === '') {
+    throw new Error('transactionId is required');
+  }
+  
+  return fetchAPI<PseUrlResponse>(`/api/kravata/order/pse?transactionId=${encodeURIComponent(transactionId.trim())}`, {
+    method: 'GET',
   });
 }

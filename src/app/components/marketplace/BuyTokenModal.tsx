@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { Offer } from '@/app/lib/supabase';
 import { formatCurrency } from '@/app/lib/formatters';
+import { getPseUrl } from '@/app/lib/api';
 
 interface BuyTokenModalProps {
   offer: Offer;
   buyerExternalId: string;
   buyerWalletId: string;
-  onSubmit: (offerId: string, quantity: number) => Promise<void>;
+  onSubmit: (offerId: string, quantity: number) => Promise<string>; // Ahora devuelve transactionId
   onClose: () => void;
   isOpen: boolean;
 }
@@ -47,11 +48,21 @@ export default function BuyTokenModal({
     setError(null);
     
     try {
-      await onSubmit(offer.id, quantity);
-      onClose();
+      // Ahora el onSubmit nos devuelve el transactionId
+      const transactionId = await onSubmit(offer.id, quantity);
+      
+      // Obtener la URL de PSE con el transactionId
+      try {
+        const { pseURL } = await getPseUrl(transactionId);
+        window.location.href = pseURL;
+      } catch (err) {
+        setError("No se pudo obtener la URL de pago PSE. Es posible que la sesión haya expirado. Por favor, intente crear una nueva orden.");
+        setLoading(false);
+      }
+      
+      // No cerramos el modal aquí, ya que estamos redirigiendo o mostrando un error
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al procesar la compra');
-    } finally {
       setLoading(false);
     }
   };

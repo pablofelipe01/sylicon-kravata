@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sync-tokens": "node scripts/syncTokens.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
+    "dotenv": "^16.4.7",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

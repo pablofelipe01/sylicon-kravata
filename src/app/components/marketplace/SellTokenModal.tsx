@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Token } from '@/app/lib/supabase';
+import { Token, TokenBalance } from '@/app/types'; // Actualizado para incluir TokenBalance
 import { formatCurrency } from '@/app/lib/formatters';
 
 interface SellTokenModalProps {
-  token: Token;
+  token: Token | TokenBalance; // Ahora puede recibir un Token o un TokenBalance
   maxQuantity: number;
-  onSubmit: (quantity: number, pricePerToken: number) => Promise<void>;
+  onSubmit: (quantity: number, pricePerToken: number, tokenAddress?: string) => Promise<void>;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -25,6 +25,10 @@ export default function SellTokenModal({
   const [error, setError] = useState<string | null>(null);
   
   if (!isOpen) return null;
+  
+  // Obtener el nombre del token y la dirección del token
+  const tokenName = 'name' in token ? token.name : token.name;
+  const tokenAddress = 'token_address' in token ? token.token_address : token.tokenAddress;
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +52,7 @@ export default function SellTokenModal({
     setError(null);
     
     try {
-      await onSubmit(quantity, pricePerToken);
+      await onSubmit(quantity, pricePerToken, tokenAddress);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear la oferta');
@@ -75,7 +79,7 @@ export default function SellTokenModal({
             <div className="sm:flex sm:items-start">
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                 <h3 className="text-lg leading-6 font-medium text-white mb-4">
-                  Vender Tokens: {token.name}
+                  Vender Tokens: {tokenName}
                 </h3>
                 
                 <form onSubmit={handleSubmit}>

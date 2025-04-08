@@ -1,90 +1,104 @@
-import { supabase, Token, Seller, createOrUpdateSeller } from './supabase';
+// app/lib/initialize-data.ts
+import { supabase } from './supabase';
+import { getWalletBalance } from './api';
+import { TokenBalance } from '../types';
 
-// Función para inicializar los datos
-export const initializeMarketplaceData = async () => {
+/**
+ * Inicializa datos de marketplace de ejemplo si es necesario
+ */
+export async function initializeMarketplaceData(): Promise<void> {
   try {
-    console.log('Inicializando datos del marketplace...');
-    
-    // Verificar si ya existen datos
-    const { count: tokenCount } = await supabase
+    // Verificar si ya hay tokens en la base de datos
+    const { data: existingTokens, error } = await supabase
       .from('tokens')
-      .select('*', { count: 'exact', head: true });
-    
-    if (tokenCount && tokenCount > 0) {
-      console.log('Los datos ya están inicializados.');
+      .select('*')
+      .limit(1);
+
+    if (error) {
+      console.error('Error al verificar tokens existentes:', error);
       return;
     }
-    
-    // Insertar token de ejemplo
-    const tokenData: Omit<Token, 'id' | 'created_at' | 'updated_at'> = {
-      token_address: '0x69aA2Ed12E241E0ea19e0061B99976d3Fb7e5d4F',
-      protocol: '1155',
-      name: 'Inmobiliario Sylicon',
-      description: 'Token que representa una fracción de propiedad inmobiliaria tokenizada.',
-      image_url: '/Token1.webp'
-    };
-    
-    const { data: token, error: tokenError } = await supabase
-      .from('tokens')
-      .insert(tokenData)
-      .select()
-      .single();
-    
-    if (tokenError) {
-      throw tokenError;
-    }
-    
-    console.log('Token insertado:', token);
-    
-    // Insertar vendedor de ejemplo (test004)
-    const sellerData: Omit<Seller, 'id' | 'created_at' | 'updated_at'> = {
-      external_id: 'test004',
-      wallet_id: 'a33e2d11-8fa3-44d8-b6a0-a43449a881ad',
-      wallet_address: '0xaa03f3e68ac41954f21bf4bdcd4d99b8f7a0d1f2'
-    };
-    
-    // Usar la función createOrUpdateSeller en lugar de insertar directamente
-    const seller = await createOrUpdateSeller(sellerData);
-    
-    console.log('Vendedor insertado/actualizado:', seller);
-    
-    // Insertar oferta de ejemplo
-    const offerData = {
-      seller_id: seller.id,
-      token_id: token.id,
-      quantity: 5,
-      price_per_token: 500000,
-      status: 'active' as const
-    };
-    
-    const { data: offer, error: offerError } = await supabase
-      .from('offers')
-      .insert(offerData)
-      .select()
-      .single();
-    
-    if (offerError) {
-      throw offerError;
-    }
-    
-    console.log('Oferta insertada:', offer);
-    console.log('Inicialización completada con éxito!');
-  } catch (error) {
-    console.error('Error al inicializar datos:', error);
-    throw error;
-  }
-};
 
-// Función para sincronizar datos del vendedor con la billetera
-export const syncSellerData = async (externalId: string, walletId: string, walletAddress: string) => {
-  try {
-    return await createOrUpdateSeller({
-      external_id: externalId,
-      wallet_id: walletId,
-      wallet_address: walletAddress
-    });
+    // Si ya hay tokens, no es necesario inicializar
+    if (existingTokens && existingTokens.length > 0) {
+      console.log('Datos de marketplace ya inicializados');
+      return;
+    }
+
+    console.log('Inicializando datos de marketplace...');
+
+    // Obtener tokens de usuarios de prueba
+    const testUsers = ['test001', 'test002', 'test003', 'test004'];
+    let allTokens: TokenBalance[] = [];
+
+    // Recopilar tokens de todos los usuarios de prueba
+    for (const externalId of testUsers) {
+      try {
+        const walletData = await getWalletBalance(externalId);
+        
+        // Verificar si el balance es un array de tokens o solo un número
+        if (typeof walletData.balance === 'object' && Array.isArray(walletData.balance)) {
+          allTokens = [...allTokens, ...walletData.balance];
+        }
+      } catch (error) {
+        console.error(`Error al obtener tokens para usuario ${externalId}:`, error);
+      }
+    }
+
+    // Eliminar duplicados basados en tokenAddress
+    const uniqueTokens = allTokens.filter((token, index, self) =>
+      index === self.findIndex(t => t.tokenAddress === token.tokenAddress)
+    );
+
+    // Insertar tokens únicos en la base de datos
+    for (const token of uniqueTokens) {
+      try {
+        const { error } = await supabase
+          .from('tokens')
+          .insert({
+            name: token.name,
+            symbol: token.symbol || '',
+            token_address: token.tokenAddress,
+            protocol: token.standard,
+            blockchain: token.blockchain,
+            description: `Token que representa una fracción de propiedad inmobiliaria tokenizada. ${token.name}`,
+            image_url: `/Token${Math.floor(Math.random() * 3) + 1}.webp`,
+            metadata: token.metadata
+          });
+
+        if (error) {
+          console.error(`Error al insertar token ${token.name}:`, error);
+        } else {
+          console.log(`Token ${token.name} inicializado correctamente`);
+        }
+      } catch (error) {
+        console.error(`Error al inicializar token ${token.name}:`, error);
+      }
+    }
+
+    // Si no hay tokens de la API, crear uno de ejemplo
+    if (uniqueTokens.length === 0) {
+      const { error } = await supabase
+        .from('tokens')
+        .insert({
+          name: 'Inmobiliario Sylicon',
+          symbol: 'SYL',
+          token_address: '0x69aA2ED12e241e0EA19e0061b99976d3Fb7e5d4F',
+          protocol: 't155',
+          blockchain: 'MATIC-AMOY',
+          description: 'Token que representa una fracción de propiedad inmobiliaria tokenizada.',
+          image_url: '/Token1.webp',
+        });
+
+      if (error) {
+        console.error('Error al insertar token de ejemplo:', error);
+      } else {
+        console.log('Token de ejemplo inicializado correctamente');
+      }
+    }
+
+    console.log('Inicialización de datos de marketplace completada');
   } catch (error) {
-    console.error('Error al sincronizar datos del vendedor:', error);
-    throw error;
+    console.error('Error general durante la inicialización de datos:', error);
   }
-};
+}

@@ -1,173 +1,206 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getWalletBalance } from '@/app/lib/api';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getWalletBalance, checkKycStatus } from '../lib/api';
+import { TokenBalance } from '../types';
 
-// Tipo para el usuario
-interface User {
-  externalId: string;
-  walletId: string;
-  walletAddress: string;
-  balance: number;
-  isLoggedIn: boolean;
-}
-
-// Estado inicial del usuario
-const initialUser: User = {
-  externalId: '',
-  walletId: '',
-  walletAddress: '',
-  balance: 0,
-  isLoggedIn: false
-};
-
-// Contexto para la autenticación
+// Definir la estructura del contexto de autenticación
 interface AuthContextType {
-  user: User;
+  user: {
+    isLoggedIn: boolean;
+    externalId: string;
+    walletId: string;
+    walletAddress: string;
+    balance: number;  // Mantenemos balance como número para compatibilidad
+    tokens: TokenBalance[];  // Añadimos array de tokens
+    kycStatus: string | null;
+  };
   login: (externalId: string) => Promise<void>;
   logout: () => void;
   refreshBalance: () => Promise<void>;
-  isLoading: boolean;
-  error: string | null;
+  checkKycStatus: () => Promise<string>;
 }
 
 // Crear el contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hook personalizado para usar el contexto de autenticación
-export const useAuth = () => {
+// Hook personalizado para acceder al contexto
+export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
-};
+}
 
-// Proveedor del contexto
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User>(initialUser);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// Props para el proveedor
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-  // Validación de IDs válidos (que pasaron KYC en Kravata)
-  const validExternalIds = ['test001', 'test002', 'test003', 'test004'];
+// Componente proveedor de autenticación
+export function AuthProvider({ children }: AuthProviderProps) {
+  // Estado del usuario
+  const [user, setUser] = useState({
+    isLoggedIn: false,
+    externalId: '',
+    walletId: '',
+    walletAddress: '',
+    balance: 0,
+    tokens: [] as TokenBalance[],
+    kycStatus: null as string | null,
+  });
 
-  // Comprobar si hay un usuario guardado en localStorage al iniciar
+  // Efecto para recuperar la sesión al cargar
   useEffect(() => {
-    const storedUser = localStorage.getItem('sylicon_user');
-    if (storedUser) {
+    const storedAuth = localStorage.getItem('auth');
+    if (storedAuth) {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        
-        // Verificar que el ID almacenado es válido
-        if (validExternalIds.includes(parsedUser.externalId)) {
-          setUser(parsedUser);
-          
-          // Actualizar el balance al cargar
-          refreshUserBalance(parsedUser.externalId);
-        } else {
-          // Si el ID no es válido, limpiar el almacenamiento
-          localStorage.removeItem('sylicon_user');
-        }
+        const parsedAuth = JSON.parse(storedAuth);
+        setUser({
+          ...parsedAuth,
+          isLoggedIn: true
+        });
       } catch (err) {
-        console.error('Error al parsear usuario del localStorage:', err);
-        localStorage.removeItem('sylicon_user');
+        console.error('Error parsing stored auth:', err);
+        localStorage.removeItem('auth');
       }
     }
   }, []);
 
-  // Función para actualizar el balance del usuario
-  const refreshUserBalance = async (externalId: string) => {
-    if (!validExternalIds.includes(externalId)) {
-      setError('ID no válido para actualizar balance');
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const walletData = await getWalletBalance(externalId);
-      
-      setUser(prev => {
-        const updatedUser = {
-          ...prev,
-          walletId: walletData.walletId,
-          walletAddress: walletData.walletAddress,
-          balance: walletData.balance,
-        };
-        
-        // Guardar en localStorage
-        localStorage.setItem('sylicon_user', JSON.stringify(updatedUser));
-        
-        return updatedUser;
-      });
-    } catch (err) {
-      console.error('Error al obtener balance:', err);
-      setError('Error al obtener información de la billetera');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Función para iniciar sesión
   const login = async (externalId: string) => {
-    // Validar que el ID es uno de los permitidos
-    if (!validExternalIds.includes(externalId)) {
-      setError('ID no válido para iniciar sesión');
-      throw new Error('ID no válido para iniciar sesión');
-    }
-    
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Obtener datos de la billetera desde Kravata
+      // Obtener balance de la billetera
       const walletData = await getWalletBalance(externalId);
       
-      // Actualizar el usuario
-      const newUser = {
-        externalId,
+      // Verificar si la respuesta tiene la nueva estructura o la antigua
+      const tokens = Array.isArray(walletData.balance) ? walletData.balance : [];
+      const balance = Array.isArray(walletData.balance) 
+        ? walletData.balance.reduce((sum, token) => sum + Number(token.amount), 0) 
+        : walletData.balance;
+      
+      // Actualizar estado del usuario
+      const userData = {
+        externalId: walletData.externalId,
         walletId: walletData.walletId,
         walletAddress: walletData.walletAddress,
-        balance: walletData.balance,
-        isLoggedIn: true
+        balance: balance,
+        tokens: tokens,
+        kycStatus: null
       };
       
-      setUser(newUser);
+      setUser({
+        ...userData,
+        isLoggedIn: true
+      });
       
       // Guardar en localStorage
-      localStorage.setItem('sylicon_user', JSON.stringify(newUser));
+      localStorage.setItem('auth', JSON.stringify(userData));
+      
+      // Verificar estado KYC
+      await checkUserKycStatus();
     } catch (err) {
-      console.error('Error de inicio de sesión:', err);
-      setError('Error al iniciar sesión. Verifica tu External ID.');
+      console.error('Error during login:', err);
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   // Función para cerrar sesión
   const logout = () => {
-    setUser(initialUser);
-    localStorage.removeItem('sylicon_user');
+    setUser({
+      isLoggedIn: false,
+      externalId: '',
+      walletId: '',
+      walletAddress: '',
+      balance: 0,
+      tokens: [],
+      kycStatus: null
+    });
+    localStorage.removeItem('auth');
   };
 
-  // Función para actualizar el balance
+  // Función para actualizar balance
   const refreshBalance = async () => {
     if (!user.externalId) return;
-    await refreshUserBalance(user.externalId);
+    
+    try {
+      const walletData = await getWalletBalance(user.externalId);
+      
+      // Verificar si la respuesta tiene la nueva estructura o la antigua
+      const tokens = Array.isArray(walletData.balance) ? walletData.balance : [];
+      const balance = Array.isArray(walletData.balance) 
+        ? walletData.balance.reduce((sum, token) => sum + Number(token.amount), 0) 
+        : walletData.balance;
+      
+      // Actualizar estado del usuario
+      setUser(prev => ({
+        ...prev,
+        walletId: walletData.walletId,
+        walletAddress: walletData.walletAddress,
+        balance,
+        tokens
+      }));
+      
+      // Actualizar en localStorage
+      localStorage.setItem('auth', JSON.stringify({
+        externalId: user.externalId,
+        walletId: walletData.walletId,
+        walletAddress: walletData.walletAddress,
+        balance,
+        tokens,
+        kycStatus: user.kycStatus
+      }));
+    } catch (err) {
+      console.error('Error refreshing balance:', err);
+      throw err;
+    }
   };
 
-  // Valores del contexto
+  // Función para verificar estado KYC
+  const checkUserKycStatus = async (): Promise<string> => {
+    if (!user.externalId) return 'unknown';
+    
+    try {
+      const kycData = await checkKycStatus(user.externalId);
+      
+      const status = kycData.status || 'unknown';
+      
+      // Actualizar estado del usuario
+      setUser(prev => ({
+        ...prev,
+        kycStatus: status
+      }));
+      
+      // Actualizar en localStorage
+      localStorage.setItem('auth', JSON.stringify({
+        externalId: user.externalId,
+        walletId: user.walletId,
+        walletAddress: user.walletAddress,
+        balance: user.balance,
+        tokens: user.tokens,
+        kycStatus: status
+      }));
+      
+      return status;
+    } catch (err) {
+      console.error('Error checking KYC status:', err);
+      return 'error';
+    }
+  };
+
+  // Contexto a proporcionar
   const value = {
     user,
     login,
     logout,
     refreshBalance,
-    isLoading,
-    error
+    checkKycStatus: checkUserKycStatus
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }

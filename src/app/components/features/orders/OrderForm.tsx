@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Input, Button } from '../../ui';
-import { createOrder } from '../../../lib/api';
+import { createOrder, getPseUrl } from '../../../lib/api';
 import { Seller, CreateOrderRequest, CreateOrderResponse } from '../../../types';
 
 interface OrderFormProps {
@@ -13,17 +13,17 @@ interface OrderFormProps {
 export default function OrderForm({ onSuccess, onError }: OrderFormProps) {
   const [loading, setLoading] = useState(false);
   const [orderForm, setOrderForm] = useState<CreateOrderRequest>({
-    amount: 100000,
+    amount: 0,
     token: "SYL",
     methodPay: "PSE",
-    recipientId: "test003",
+    recipientId: "",
     recipientWalletId: "",
-    tokensReceived: 2,
+    tokensReceived: 0,
     sellers: [{
       walletId: "",
-      externalId: "test002",
-      tokensSold: 2,
-      pricePerToken: 50000
+      externalId: "",
+      tokensSold: 0,
+      pricePerToken: 0
     }]
   });
 
@@ -213,17 +213,49 @@ export default function OrderForm({ onSuccess, onError }: OrderFormProps) {
   );
 }
 
-// Componente para mostrar la respuesta de creación de orden
+// Componente actualizado para mostrar la respuesta de creación de orden
 export function OrderCreationResponse({ data }: { data: CreateOrderResponse }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const handlePseRedirect = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { pseURL } = await getPseUrl(data.transactionId);
+      window.location.href = pseURL;
+    } catch (err) {
+      setError("No se pudo obtener la URL de pago PSE. Es posible que la sesión haya expirado. Por favor, intente crear una nueva orden.");
+      setLoading(false);
+    }
+  };
+  
   return (
     <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
       <h3 className="text-lg font-medium mb-2 text-green-800 dark:text-green-200">Order Created Successfully!</h3>
       <p className="font-medium text-green-700 dark:text-green-300">Transaction ID:</p>
       <p className="text-sm break-all mb-4">{data.transactionId}</p>
       
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        You can use this Transaction ID to check the order details later.
-      </p>
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-md text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+      
+      <div className="flex flex-col space-y-2">
+        <button
+          onClick={handlePseRedirect}
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Redirigiendo...' : 'Continuar al pago PSE'}
+        </button>
+        
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Puedes usar este Transaction ID para verificar los detalles de la orden más tarde.
+        </p>
+      </div>
     </div>
   );
 }

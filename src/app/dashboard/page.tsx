@@ -19,6 +19,8 @@ import { Button, Card } from "../components/ui";
 import { formatCurrency } from "../lib/formatters";
 import { useRouter } from "next/navigation";
 import UserTransactionHistory from "../components/features/transactions/UserTransactionHistory";
+import UserTokensSection from "../components/features/tokens/UserTokensSection";
+import { TokenBalance } from "../types";
 
 export default function DashboardPage() {
   const { user, refreshBalance } = useAuth();
@@ -98,8 +100,8 @@ export default function DashboardPage() {
   };
   
   // Crear una nueva oferta
-  const handleCreateOffer = async (quantity: number, pricePerToken: number) => {
-    if (!selectedToken || !user.walletId) return;
+  const handleCreateOffer = async (quantity: number, pricePerToken: number, tokenAddress?: string) => {
+    if (!user.walletId) return;
     
     try {
       // Obtener o crear el vendedor
@@ -109,10 +111,26 @@ export default function DashboardPage() {
         throw new Error("No se pudo encontrar o crear el vendedor");
       }
       
+      // Si se proporciona un tokenAddress específico, buscar el token por su dirección
+      let tokenToSell = selectedToken;
+      
+      if (tokenAddress && (!selectedToken || selectedToken.token_address !== tokenAddress)) {
+        const foundToken = tokens.find(t => t.token_address.toLowerCase() === tokenAddress.toLowerCase());
+        if (foundToken) {
+          tokenToSell = foundToken;
+        } else {
+          throw new Error("No se encontró el token en el marketplace");
+        }
+      }
+      
+      if (!tokenToSell) {
+        throw new Error("No se seleccionó un token válido");
+      }
+      
       // Crear la oferta en Supabase
       const newOffer = await createOffer({
         seller_id: seller.id,
-        token_id: selectedToken.id,
+        token_id: tokenToSell.id,
         quantity,
         price_per_token: pricePerToken,
         status: 'active'
@@ -221,50 +239,27 @@ export default function DashboardPage() {
           </Link>
         </div>
         
-        {tokens.length === 0 ? (
+        {user.tokens.length === 0 ? (
           <Card className="p-8 text-center">
-            <p className="text-gray-400">No hay tokens disponibles.</p>
+            <p className="text-gray-400">No posees tokens en tu billetera.</p>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tokens.map(token => (
-              <div key={token.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-                <div className="relative h-48 w-full">
-                  <Image 
-                    src={token.image_url || '/placeholder-token.png'} 
-                    alt={token.name}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-bold text-white">{token.name}</h3>
-                    <span className="bg-blue-900 text-blue-300 px-2 py-1 text-xs rounded-full">
-                      {token.protocol}
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm text-gray-300 mb-4">{token.description}</p>
-                  
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <p className="text-sm text-gray-400">Balance:</p>
-                      <p className="text-lg font-bold text-white">{user.balance} tokens</p>
-                    </div>
-                    <Button 
-                      onClick={() => handleSellToken(token)} 
-                      variant="success"
-                      disabled={user.balance <= 0}
-                    >
-                      Vender Tokens
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <UserTokensSection 
+  tokens={user.tokens} 
+  marketplaceTokens={tokens} // Pasa los tokens del marketplace
+  onSellToken={(token: TokenBalance) => {
+    // Buscar el token en la lista de tokens disponibles
+    const marketplaceToken = tokens.find(t => 
+      t.token_address.toLowerCase() === token.tokenAddress.toLowerCase()
+    );
+    
+    if (marketplaceToken) {
+      handleSellToken(marketplaceToken);
+    } else {
+      setError("Este token no está disponible en el marketplace actualmente");
+    }
+  }}
+/>
         )}
       </section>
       
@@ -344,11 +339,12 @@ export default function DashboardPage() {
           </div>
         )}
       </section>
+      
       {/* Historial de Transacciones */}
-<section className="mt-10">
-  <h2 className="text-xl font-bold text-white mb-4">Historial de Transacciones</h2>
-  <UserTransactionHistory externalId={user.externalId} />
-</section>
+      <section className="mt-10">
+        <h2 className="text-xl font-bold text-white mb-4">Historial de Transacciones</h2>
+        <UserTransactionHistory externalId={user.externalId} />
+      </section>
       
       {/* Modal para vender tokens */}
       {selectedToken && (

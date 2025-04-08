@@ -59,3 +59,27 @@ export interface KycStatus {
     transactionId: string;
     // Otros campos...
   }
+
+  // Tipo para la respuesta de PSE URL
+export interface PseUrlResponse {
+  pseURL: string;
+}
+
+// Tipo para un token individual en el balance
+export interface TokenBalance {
+  amount: string;
+  metadata: string;
+  blockchain: string;
+  name: string;
+  standard: string;
+  symbol: string;
+  tokenAddress: string;
+}
+
+// Tipo actualizado para la respuesta de balance de billetera
+export interface WalletBalance {
+  walletId: string;
+  walletAddress: string;
+  externalId: string;
+  balance: TokenBalance[] | number; // Compatible con ambos formatos
+}
