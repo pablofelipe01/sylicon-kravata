@@ -20,8 +20,8 @@ export default function Header() {
             <Image
               src="/logo2.png"
               alt="Sylicon Logo"
-              width={200}  // Aumentado de 40 a 60
-              height={200} // Aumentado de 40 a 60
+              width={200}
+              height={200}
               priority
               className="mr-3"
             />
@@ -69,6 +69,16 @@ export default function Header() {
                 Mi Cuenta
               </Link>
             </li>
+            <li>
+              <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
+                Nosotros
+              </Link>
+            </li>
+            <li>
+              <Link href="/contacto" className="text-gray-300 hover:text-white transition-colors">
+                Contacto
+              </Link>
+            </li>
           </ul>
           
           <UserMenu />
@@ -104,6 +114,24 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Mi Cuenta
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/nosotros" 
+                className="block text-gray-300 hover:text-white transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Nosotros
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/contacto" 
+                className="block text-gray-300 hover:text-white transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contacto
               </Link>
             </li>
           </ul>
