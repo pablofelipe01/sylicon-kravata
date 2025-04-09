@@ -21,6 +21,10 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
       try {
         setLoading(true);
         const data = await getTransactionHistory(externalId);
+        
+        // Añadido para depuración: Ver los datos crudos de la API
+        console.log("Datos crudos de transacciones:", JSON.stringify(data, null, 2));
+        
         setTransactionData(data);
       } catch (err) {
         console.error("Error loading transactions:", err);
@@ -55,6 +59,18 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
       console.error("Error formatting date:", error);
       return "Fecha no disponible";
     }
+  };
+
+  // Función para mapear nombres de tokens
+  const getTokenName = (tokenSymbol: string) => {
+    // Mapa de símbolos de tokens a nombres más descriptivos
+    const tokenMap: {[key: string]: string} = {
+      'SYL': 'Sylicon',
+      'ISII': 'Inmobiliario Sylicon II',
+      'ISIIl': 'Inmobiliario Sylicon III'
+    };
+    
+    return tokenMap[tokenSymbol] || tokenSymbol;
   };
 
   if (loading) {
@@ -102,14 +118,15 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Token</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Cantidad</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Precio</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
             {transactionData.transactions.map((transaction) => {
               // Determinar estilo basado en el rol (comprador/vendedor)
               const roleStyles = 
-                transaction.role === 'buyer' ? 'bg-green-900/40 text-green-400' : 
-                transaction.role === 'seller' ? 'bg-blue-900/40 text-blue-400' : 
+                transaction.role === 'buyer' ? 'bg-green-900/40 text-green-300' : 
+                transaction.role === 'seller' ? 'bg-blue-900/40 text-blue-300' : 
                 'bg-gray-700 text-gray-300';
               
               // Formatear el rol
@@ -117,6 +134,20 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
                 transaction.role === 'buyer' ? 'Compra' : 
                 transaction.role === 'seller' ? 'Venta' : 
                 transaction.role;
+              
+              // Calcular valores de precio y total
+              const price = transaction.averageRate && transaction.averageRate > 0 
+                ? transaction.averageRate 
+                : (transaction.pricePerToken && transaction.pricePerToken > 0 
+                    ? transaction.pricePerToken 
+                    : 0);
+                
+              const total = transaction.totalAmount && transaction.totalAmount > 0
+                ? transaction.totalAmount
+                : price * (transaction.amount || 0);
+              
+              // Obtener nombre más descriptivo del token
+              const tokenName = getTokenName(transaction.token || "");
               
               return (
                 <tr key={transaction.transactionId} className="hover:bg-gray-750">
@@ -129,13 +160,16 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {transaction.token || "N/A"}
+                    {tokenName || "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {transaction.amount || "0"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {formatCurrency(transaction.pricePerToken || 0)}
+                    {formatCurrency(price)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {formatCurrency(total)}
                   </td>
                 </tr>
               );
