@@ -64,11 +64,11 @@ export default function Header() {
                 Marketplace
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors">
                 Mi Cuenta
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
                 Nosotros
