@@ -32,6 +32,31 @@ if (!KRAVATA_API_KEY) {
 // Lista de externalIds de prueba
 const TEST_USERS = ['test001', 'test002', 'test003', 'test004'];
 
+// Mapeo de direcciones de tokens a símbolos
+const TOKEN_ADDRESS_TO_SYMBOL = {
+  "0xfd5e7724f360ec5461214e06254ec6eb4fdfa41d": "ISII",
+  "0xcbfe1e937e309709b320972dddc67cb118a69053": "ISIII",
+  "0x69aa2ed12e241e0ea19e0061b99976d3fb7e5d4f": "SYL",
+};
+
+// Función para determinar el símbolo correcto basado en la dirección del token
+function getTokenSymbol(tokenAddress, tokenName) {
+  if (tokenAddress && TOKEN_ADDRESS_TO_SYMBOL[tokenAddress.toLowerCase()]) {
+    return TOKEN_ADDRESS_TO_SYMBOL[tokenAddress.toLowerCase()];
+  }
+  
+  // Si no hay mapeo y tenemos un nombre, generar un símbolo basado en el nombre
+  if (tokenName) {
+    const words = tokenName.split(' ');
+    if (words.length > 1) {
+      return words.map(w => w[0]).join('').toUpperCase();
+    }
+    return tokenName.substring(0, 3).toUpperCase();
+  }
+  
+  return 'TKN';
+}
+
 /**
  * Obtiene el balance de tokens de un usuario desde la API de Kravata
  */
@@ -110,7 +135,7 @@ async function getTableColumns(tableName) {
 
     // Si aún no hay datos, usa una lista hardcoded basada en lo que has visto
     console.log('No se pudieron determinar las columnas automáticamente, usando lista predefinida');
-    return ['id', 'name', 'token_address', 'protocol', 'description', 'image_url'];
+    return ['id', 'name', 'token_address', 'protocol', 'description', 'image_url', 'symbol'];
   } catch (error) {
     console.error('Error general al obtener columnas:', error);
     return [];
@@ -149,10 +174,14 @@ async function syncTokenToSupabase(token, externalId, availableColumns) {
     // Imagen aleatoria entre las existentes
     const randomImage = `/Token${Math.floor(Math.random() * 3) + 1}.webp`;
     
+    // Obtener el símbolo correcto del token
+    const tokenSymbol = getTokenSymbol(token.tokenAddress, token.name);
+    console.log(`Asignando símbolo: ${tokenSymbol} para token: ${token.name}`);
+    
     // Datos completos del token
     const completeTokenData = {
       name: token.name || 'Token sin nombre',
-      symbol: token.symbol || '',
+      symbol: tokenSymbol,
       token_address: token.tokenAddress,
       protocol: token.standard || 't155',
       blockchain: token.blockchain || 'MATIC-AMOY',

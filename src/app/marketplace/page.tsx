@@ -17,6 +17,7 @@ import { Button, Card } from "../components/ui";
 import { useAuth } from "../contexts/AuthContext";
 import { createOrder } from "../lib/api"; // Importar createOrder desde api.ts para Kravata
 import { CreateOrderRequest } from "../types";
+import { getTokenSymbol } from "../lib/tokenMapping"; // Importar la función de mapeo
 
 export default function MarketplacePage() {
   const { user, refreshBalance } = useAuth();
@@ -87,7 +88,7 @@ export default function MarketplacePage() {
     setBuyModalOpen(true);
   };
   
-  // Procesar la compra - VERSIÓN ACTUALIZADA
+  // Procesar la compra - VERSIÓN ACTUALIZADA CON MAPEO DE TOKENS
   const handleProcessPurchase = async (offerId: string, quantity: number): Promise<string> => {
     if (!selectedOffer || !user.externalId || !user.walletId) {
       throw new Error("Debes iniciar sesión para comprar tokens");
@@ -104,11 +105,21 @@ export default function MarketplacePage() {
         throw new Error('No hay suficientes tokens disponibles');
       }
       
+      console.log("Procesando compra para oferta:", selectedOffer);
+      
+      // Obtener el símbolo correcto del token basado en su dirección
+      const tokenSymbol = getTokenSymbol(
+        selectedOffer.token.token_address, 
+        selectedOffer.token.name
+      );
+      
+      console.log(`Usando símbolo de token: ${tokenSymbol} para dirección: ${selectedOffer.token.token_address}`);
+      
       // Preparar datos para la orden en Kravata
       const orderData: CreateOrderRequest = {
         amount: selectedOffer.price_per_token * quantity,
-        token: selectedOffer.token.symbol || 'SYL',
-        methodPay: 'PSE', // Usar PSE como método de pago
+        token: tokenSymbol,
+        methodPay: 'PSE',
         recipientId: user.externalId,
         recipientWalletId: user.walletId || '',
         tokensReceived: quantity,
@@ -121,6 +132,8 @@ export default function MarketplacePage() {
           }
         ]
       };
+      
+      console.log("Datos de orden validados. Preparando solicitud:", orderData);
       
       // Crear la orden en Kravata
       const kravataOrderResponse = await createOrder(orderData);
