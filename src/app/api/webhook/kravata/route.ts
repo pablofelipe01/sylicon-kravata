@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 
 // Opcional: Verificación de seguridad para asegurar que las solicitudes provengan de Kravata
