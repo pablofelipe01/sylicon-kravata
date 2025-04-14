@@ -159,14 +159,23 @@ Todos los derechos reservados.
 
 ### Marco Legal
 
+Este software es propiedad intelectual de Pablo Felipe Acevedo Cuellar, identificado con Cédula de Ciudadanía de la República de Colombia No. 79454772.
+
+**Este software es de naturaleza propietaria y todos los derechos están reservados, incluyendo, pero no limitado a, el código fuente, la interfaz de usuario, el diseño, la documentación y cualquier material asociado.**
+
+Marco Legal
+
 Este software está protegido por:
+Ley 23 de 1982, modificada por la Ley 1915 de 2018 (Colombia)
+Decreto 1360 de 1989
+Decisión Andina 351 de 1993
+Convenio de Berna, Tratados de la OMPI (WCT)
 
-- **Ley 23 de 1982**, modificada por la **Ley 1915 de 2018** (Colombia)
-- **Decreto 1360 de 1989**
-- **Decisión Andina 351 de 1993**
-- **Convenio de Berna**, **Tratados de la OMPI (WCT)**
+Queda estrictamente prohibido el uso, copia, distribución, modificación, ingeniería inversa o implementación parcial o total de este software sin un contrato de licenciamiento explícito y firmado con el propietario. Cualquier infracción de estos derechos constituye delito conforme a los artículos 270 a 272 del Código Penal Colombiano (Ley 599 de 2000) y puede acarrear las sanciones legales correspondientes.
 
-Queda estrictamente prohibido el uso, copia, distribución o implementación parcial o total de este software sin un contrato de licenciamiento firmado. Cualquier infracción constituye delito conforme a los artículos 270 a 272 del Código Penal Colombiano (Ley 599 de 2000).
+**Copyright (c) 2025 Pablo Felipe Acevedo Cuellar. Todos los derechos reservados.**
+
+**Para obtener una licencia de uso de este software, por favor contactar a pablofelipe@mac.com.**
 
 ## Más Información
 
