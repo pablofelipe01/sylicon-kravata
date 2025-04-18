@@ -49,7 +49,7 @@ export default function HomePage() {
           <div className="lg:w-1/2 flex justify-center">
             <div className="relative w-full max-w-md">
               <Image
-                src="/Token1.webp"
+                src="/Token7.webp"
                 alt="Propiedad tokenizada"
                 width={500}
                 height={500}

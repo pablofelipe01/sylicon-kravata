@@ -11,7 +11,7 @@ interface TokenCardProps {
   onBuy?: (offer: Offer) => void;
   onSell?: (token: Token) => void;
   isOwner?: boolean;
-  view?: 'marketplace' | 'account'; // Nueva prop para indicar la vista
+  view?: 'marketplace' | 'account';
 }
 
 export default function TokenCard({ 
@@ -20,7 +20,7 @@ export default function TokenCard({
   onBuy, 
   onSell, 
   isOwner = false,
-  view = 'marketplace' // Por defecto, estamos en el marketplace
+  view = 'marketplace'
 }: TokenCardProps) {
   const [showOffers, setShowOffers] = useState(false);
   
@@ -31,16 +31,19 @@ export default function TokenCard({
   
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-xl transition-all hover:shadow-2xl">
-      {/* Imagen del token */}
-      <div className="relative h-48 w-full">
-        <Image 
-          src={token.image_url || '/placeholder-token.png'} 
-          alt={token.name}
-          fill
-          style={{ objectFit: 'cover' }}
-          className="transition-transform hover:scale-105"
-        />
-      </div>
+      {/* Imagen del token - CORREGIDO */}
+  
+<div className="relative w-full h-64">  {/* Cambiado de h-48 a h-64 */}
+  <Image 
+    src={token.image_url || '/placeholder-token.png'} 
+    alt={token.name}
+    width={400}
+    height={300}
+    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    className="object-contain w-full h-full transition-transform hover:scale-105"
+    priority
+  />
+</div>
       
       {/* Información del token */}
       <div className="p-4">
@@ -70,7 +73,6 @@ export default function TokenCard({
         
         {/* Botones de acción */}
         <div className="flex flex-col gap-2">
-          {/* Cambiar la lógica para manejar diferentes vistas */}
           {view === 'account' && isOwner ? (
             <button
               onClick={() => onSell && onSell(token)}

@@ -8,11 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "sync-tokens": "node scripts/syncTokens.js",
-    "update-symbols": "node scripts/updateTokenSymbols.js"
+    "update-symbols": "node scripts/updateTokenSymbols.js",
+    "verify-prod": "node scripts/verify-production-api.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
-    "dotenv": "^16.4.7",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -23,6 +23,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "tailwindcss": "^4",

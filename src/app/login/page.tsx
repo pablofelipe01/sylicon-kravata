@@ -64,7 +64,7 @@ export default function LoginPage() {
           </div>
           
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-300 mb-2">IDs disponibles para pruebas:</h3>
+            {/* <h3 className="text-sm font-medium text-gray-300 mb-2">IDs disponibles para pruebas:</h3> */}
             <div className="flex flex-wrap gap-2">
               {['test001', 'test002', 'test003', 'test004'].map((id) => (
                 <button
@@ -77,9 +77,9 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs text-blue-400">
+            {/* <p className="mt-2 text-xs text-blue-400">
               * Estos son los IDs que ya han completado el proceso KYC en Kravata.
-            </p>
+            </p> */}
           </div>
           
           <div className="mt-6">

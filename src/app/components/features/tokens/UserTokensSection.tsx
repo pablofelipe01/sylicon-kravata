@@ -7,10 +7,14 @@ import { truncateAddress } from '@/app/lib/formatters';
 interface UserTokensSectionProps {
   tokens: TokenBalance[];
   onSellToken: (token: TokenBalance) => void;
-  marketplaceTokens?: any[]; // Acepta tokens del marketplace para buscar imágenes
+  marketplaceTokens?: unknown[]; // Acepta tokens del marketplace para buscar imágenes
 }
 
-export default function UserTokensSection({ tokens, onSellToken, marketplaceTokens = [] }: UserTokensSectionProps) {
+export default function UserTokensSection({ 
+  tokens, 
+  onSellToken, 
+  marketplaceTokens = [] 
+}: UserTokensSectionProps) {
   if (!tokens.length) {
     return (
       <Card className="p-8 text-center">
@@ -35,16 +39,19 @@ export default function UserTokensSection({ tokens, onSellToken, marketplaceToke
         
         return (
           <div key={`${token.tokenAddress}-${index}`} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-            <div className="relative h-40 w-full">
+            {/* Contenedor de imagen con altura fija mayor */}
+            <div className="relative w-full pb-[75%] overflow-hidden pt-4 rounded-t-lg"> {/* Aumentado a pb-[66.67%] (ratio 3:2) y pt-4 */}
               {tokenImage ? (
-                <Image 
-                  src={tokenImage} 
-                  alt={token.name} 
+                <Image
+                  src={tokenImage}
+                  alt={token.name}
                   fill
-                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-contain p-1 rounded-lg" // Aumentado padding a p-3
+                  priority
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center rounded-lg">
                   <h3 className="text-2xl font-bold text-white text-center px-4 drop-shadow-lg">
                     {token.name}
                   </h3>
@@ -82,8 +89,8 @@ export default function UserTokensSection({ tokens, onSellToken, marketplaceToke
                     <p className="text-lg font-bold text-white">{token.amount} tokens</p>
                   </div>
                   {Number(token.amount) > 0 && (
-                    <Button 
-                      onClick={() => onSellToken(token)} 
+                    <Button
+                      onClick={() => onSellToken(token)}
                       variant="success"
                       size="sm"
                     >

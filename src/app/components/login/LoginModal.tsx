@@ -48,19 +48,19 @@ export default function LoginModal({ isOpen, onClose }) {
               id="externalId"
               value={externalId}
               onChange={(e) => setExternalId(e.target.value)}
-              placeholder="Ingresa tu External ID"
+              placeholder="Ingresa tu ID"
               required
               className="w-full"
             />
             <p className="mt-2 text-sm text-gray-400">
-              Este ID es proporcionado por Kravata después del proceso KYC.
+              Este ID es tu Identificación aprobada por Kravata después del proceso KYC.
             </p>
           </div>
           
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-300 mb-2">IDs disponibles para pruebas:</h3>
+            {/* <h3 className="text-sm font-medium text-gray-300 mb-2">IDs disponibles para pruebas:</h3> */}
             <div className="flex flex-wrap gap-2">
-              {['test001', 'test002', 'test003', 'test004'].map((id) => (
+              {[].map((id) => (
                 <button
                   key={id}
                   type="button"
@@ -71,9 +71,9 @@ export default function LoginModal({ isOpen, onClose }) {
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs text-blue-400">
+            {/* <p className="mt-2 text-xs text-blue-400">
               * Estos son los IDs que ya han completado el proceso KYC en Kravata.
-            </p>
+            </p> */}
           </div>
           
           <div className="mt-6 flex flex-col gap-4">
