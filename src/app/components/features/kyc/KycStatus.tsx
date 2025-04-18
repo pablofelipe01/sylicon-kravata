@@ -52,7 +52,7 @@ export default function KycStatus({ onSuccess, onError }: KycStatusProps) {
         <div className="mt-2 mb-4">
           <h3 className="text-sm font-medium text-gray-300 mb-2">IDs de prueba disponibles:</h3>
           <div className="flex flex-wrap gap-2">
-            {['test001', 'test002', 'test003', 'test004'].map((id) => (
+            {[].map((id) => (
               <button
                 key={id}
                 type="button"

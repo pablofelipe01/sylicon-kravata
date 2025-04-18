@@ -20,7 +20,7 @@ import { CreateOrderRequest } from "../types";
 import { getTokenSymbol } from "../lib/tokenMapping"; // Importar la función de mapeo
 
 export default function MarketplacePage() {
-  const { user, refreshBalance } = useAuth();
+  const { user, refreshBalance, isLoading } = useAuth();
   
   const [tokens, setTokens] = useState<Token[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -187,7 +187,8 @@ export default function MarketplacePage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+               style={{ borderColor: '#8CCA6E', borderTopColor: 'transparent' }}></div>
           <p className="text-gray-400">Cargando marketplace...</p>
         </div>
       </div>
@@ -203,11 +204,19 @@ export default function MarketplacePage() {
           <div className="bg-gray-800 rounded-lg p-3 flex items-center gap-3">
             <div>
               <p className="text-sm text-gray-400">ID: {user.externalId}</p>
-              <p className="text-sm text-gray-400">Balance: <span className="text-green-400 font-bold">{user.balance} tokens</span></p>
+              <p className="text-sm text-gray-400">Balance: <span style={{ color: '#8CCA6E' }} className="font-bold">{user.balance} tokens</span></p>
             </div>
-            <Button variant="secondary" onClick={refreshBalance}>
-              Actualizar
-            </Button>
+            <button
+              onClick={refreshBalance}
+              disabled={isLoading}
+              className="px-3 py-1 text-sm font-medium text-white rounded-md transition-all"
+              style={{ 
+                background: isLoading ? 'rgba(58, 141, 140, 0.5)' : 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                backgroundSize: '200% auto',
+              }}
+            >
+              {isLoading ? 'Actualizando...' : 'Actualizar'}
+            </button>
           </div>
         )}
       </div>

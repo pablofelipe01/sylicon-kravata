@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -49,7 +50,7 @@ const FAQ = () => {
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Preguntas Frecuentes</h2>
-          <div className="h-1 w-20 bg-blue-600 mx-auto"></div>
+          <div className="h-1 w-20 mx-auto" style={{ background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)' }}></div>
           <p className="mt-4 text-gray-300">Encuentra respuestas a las preguntas más comunes sobre Sylicon y la inversión en tokens inmobiliarios.</p>
         </div>
 
@@ -57,7 +58,14 @@ const FAQ = () => {
           {faqItems.map((item, index) => (
             <div 
               key={index} 
-              className={`bg-gray-800 rounded-lg overflow-hidden transition-all duration-300 ${activeIndex === index ? 'shadow-lg shadow-blue-500/10' : ''}`}
+              className={`bg-gray-800 rounded-lg overflow-hidden transition-all duration-300 ${
+                activeIndex === index ? 'shadow-lg' : ''
+              }`}
+              style={
+                activeIndex === index 
+                  ? { boxShadow: '0 4px 6px -1px rgba(58, 141, 140, 0.1), 0 2px 4px -1px rgba(140, 202, 110, 0.06)' } 
+                  : {}
+              }
             >
               <button
                 className="flex justify-between items-center w-full px-6 py-4 text-left focus:outline-none"
@@ -65,10 +73,11 @@ const FAQ = () => {
               >
                 <span className="font-semibold text-white">{item.question}</span>
                 <svg 
-                  className={`w-5 h-5 text-blue-400 transform transition-transform duration-300 ${activeIndex === index ? 'rotate-180' : ''}`} 
+                  className={`w-5 h-5 transform transition-transform duration-300 ${activeIndex === index ? 'rotate-180' : ''}`} 
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
+                  style={{ color: '#71BB87' }}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -86,9 +95,23 @@ const FAQ = () => {
 
         <div className="mt-12 text-center">
           <p className="text-gray-400 mb-4">¿No encontraste lo que buscabas?</p>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-300">
-            Contáctanos
-          </button>
+          <Link href="/contacto">
+            <button 
+              className="px-6 py-3 font-medium text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+              style={{ 
+                background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                backgroundSize: '200% auto',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundPosition = 'right center';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundPosition = 'left center';
+              }}
+            >
+              Contáctanos
+            </button>
+          </Link>
         </div>
       </div>
     </section>

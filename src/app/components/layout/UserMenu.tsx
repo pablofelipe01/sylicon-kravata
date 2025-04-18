@@ -30,7 +30,13 @@ export default function UserMenu() {
             onClick={() => setMenuOpen(!menuOpen)}
             className="flex items-center gap-2 px-3 py-2 rounded-md bg-gray-800 hover:bg-gray-700 transition-colors"
           >
-            <div className="bg-gradient-to-br from-teal-400 to-green-400 rounded-full p-1.5">
+            {/* Icono de usuario con el gradiente turquesa-verde */}
+            <div 
+              className="rounded-full p-1.5" 
+              style={{ 
+                background: 'linear-gradient(135deg, #3A8D8C 0%, #8CCA6E 100%)' 
+              }}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -80,7 +86,18 @@ export default function UserMenu() {
       ) : (
         <button
           onClick={() => setLoginModalOpen(true)}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 transition-all shadow-md hover:shadow-lg"
+          style={{ 
+            background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+            backgroundSize: '200% auto',
+            boxShadow: '0 4px 6px rgba(58, 141, 140, 0.12), 0 1px 3px rgba(140, 202, 110, 0.08)',
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundPosition = 'right center';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundPosition = 'left center';
+          }}
         >
           Iniciar Sesión
         </button>

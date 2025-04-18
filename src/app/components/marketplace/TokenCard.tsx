@@ -31,19 +31,17 @@ export default function TokenCard({
   
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-xl transition-all hover:shadow-2xl">
-      {/* Imagen del token - CORREGIDO */}
-  
-<div className="relative w-full h-64">  {/* Cambiado de h-48 a h-64 */}
-  <Image 
-    src={token.image_url || '/placeholder-token.png'} 
-    alt={token.name}
-    width={400}
-    height={300}
-    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-    className="object-contain w-full h-full transition-transform hover:scale-105"
-    priority
-  />
-</div>
+      {/* Imagen del token */}
+      <div className="relative w-full pb-[66.67%] overflow-hidden pt-4 rounded-t-lg">
+        <Image 
+          src={token.image_url || '/placeholder-token.png'} 
+          alt={token.name}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-contain p-3 rounded-lg"
+          priority
+        />
+      </div>
       
       {/* Información del token */}
       <div className="p-4">
@@ -52,7 +50,10 @@ export default function TokenCard({
         
         <div className="flex justify-between items-center mb-3">
           <div className="text-xs text-gray-400">ID: {token.token_address.slice(0, 6)}...{token.token_address.slice(-4)}</div>
-          <div className="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded-full">{token.protocol}</div>
+          <div className="text-xs px-2 py-1 rounded-full" 
+               style={{ backgroundColor: 'rgba(58, 141, 140, 0.2)', color: '#8CCA6E' }}>
+            {token.protocol}
+          </div>
         </div>
         
         {/* Información de ofertas */}
@@ -64,7 +65,9 @@ export default function TokenCard({
             </div>
             <div className="flex justify-between text-sm text-gray-300">
               <span>Precio desde:</span>
-              <span className="font-semibold text-green-400">{lowestPrice ? formatCurrency(lowestPrice) : 'N/A'}</span>
+              <span className="font-semibold" style={{ color: '#8CCA6E' }}>
+                {lowestPrice ? formatCurrency(lowestPrice) : 'N/A'}
+              </span>
             </div>
           </div>
         ) : (
@@ -76,14 +79,24 @@ export default function TokenCard({
           {view === 'account' && isOwner ? (
             <button
               onClick={() => onSell && onSell(token)}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-full py-2 font-medium transition-colors"
+              className="text-white rounded-full py-2 font-medium transition-all"
+              style={{ 
+                background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+              }}
             >
               Vender Tokens
             </button>
           ) : (
             <button
               onClick={() => setShowOffers(!showOffers)}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full py-2 font-medium transition-colors"
+              className={`text-white rounded-full py-2 font-medium transition-all ${
+                offers.length === 0 ? 'bg-gray-600 cursor-not-allowed' : ''
+              }`}
+              style={
+                offers.length > 0 
+                  ? { background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)' }
+                  : {}
+              }
               disabled={offers.length === 0}
             >
               {offers.length === 0 ? 'Sin disponibilidad' : (showOffers ? 'Ocultar ofertas' : 'Ver ofertas')}
@@ -106,10 +119,13 @@ export default function TokenCard({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-sm font-bold text-green-400">{formatCurrency(offer.price_per_token)}</div>
+                  <div className="text-sm font-bold" style={{ color: '#8CCA6E' }}>
+                    {formatCurrency(offer.price_per_token)}
+                  </div>
                   <button 
                     onClick={() => onBuy && onBuy(offer)} 
-                    className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded-full"
+                    className="text-white text-xs px-3 py-1 rounded-full"
+                    style={{ background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)' }}
                   >
                     Comprar
                   </button>

@@ -15,6 +15,7 @@ interface AuthContextType {
     tokens: TokenBalance[];  // Añadimos array de tokens
     kycStatus: string | null;
   };
+  isLoading: boolean; // Estado de carga para operaciones asíncronas
   login: (externalId: string) => Promise<void>;
   logout: () => void;
   refreshBalance: () => Promise<void>;
@@ -50,6 +51,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     tokens: [] as TokenBalance[],
     kycStatus: null as string | null,
   });
+  
+  // Estado de carga
+  const [isLoading, setIsLoading] = useState(false);
 
   // Efecto para recuperar la sesión al cargar
   useEffect(() => {
@@ -70,6 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Función para iniciar sesión
   const login = async (externalId: string) => {
+    setIsLoading(true);
     try {
       // Obtener balance de la billetera
       const walletData = await getWalletBalance(externalId);
@@ -103,6 +108,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (err) {
       console.error('Error during login:', err);
       throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -124,6 +131,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshBalance = async () => {
     if (!user.externalId) return;
     
+    setIsLoading(true);
     try {
       const walletData = await getWalletBalance(user.externalId);
       
@@ -154,6 +162,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (err) {
       console.error('Error refreshing balance:', err);
       throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -161,6 +171,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkUserKycStatus = async (): Promise<string> => {
     if (!user.externalId) return 'unknown';
     
+    setIsLoading(true);
     try {
       const kycData = await checkKycStatus(user.externalId);
       
@@ -186,12 +197,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (err) {
       console.error('Error checking KYC status:', err);
       return 'error';
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Contexto a proporcionar
   const value = {
     user,
+    isLoading,
     login,
     logout,
     refreshBalance,

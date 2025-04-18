@@ -23,7 +23,7 @@ import UserTokensSection from "../components/features/tokens/UserTokensSection";
 import { TokenBalance } from "../types";
 
 export default function DashboardPage() {
-  const { user, refreshBalance } = useAuth();
+  const { user, refreshBalance, isLoading } = useAuth();
   const router = useRouter();
   
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -172,9 +172,16 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-white mb-4">Acceso Restringido</h1>
         <p className="text-gray-400 mb-8">Debes iniciar sesión para acceder a esta página.</p>
-        <Link href="/">
-          <Button variant="primary">Volver al Inicio</Button>
-        </Link>
+        <button
+          onClick={() => router.push('/')}
+          className="px-4 py-2 text-sm font-medium text-white rounded-md transition-all shadow-md hover:shadow-lg"
+          style={{ 
+            background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+            backgroundSize: '200% auto',
+          }}
+        >
+          Volver al Inicio
+        </button>
       </div>
     );
   }
@@ -183,7 +190,8 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+               style={{ borderColor: '#8CCA6E', borderTopColor: 'transparent' }}></div>
           <p className="text-gray-400">Cargando dashboard...</p>
         </div>
       </div>
@@ -200,27 +208,32 @@ export default function DashboardPage() {
         
         <div className="bg-gray-800 rounded-lg p-4 w-full md:w-auto">
           <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-teal-400 to-green-400 rounded-full p-3">
+            <div className="rounded-full p-3"
+                 style={{ background: 'linear-gradient(135deg, #3A8D8C 0%, #8CCA6E 100%)' }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
             </div>
             <div>
               <p className="text-sm text-gray-400">ID: {user.externalId}</p>
-              <p className="text-xl font-bold text-white">{user.balance} <span className="text-green-400">Tokens</span></p>
+              <p className="text-xl font-bold text-white">{user.balance} <span style={{ color: '#8CCA6E' }}>Tokens</span></p>
               <p className="text-xs text-gray-500 truncate max-w-xs">
                 {user.walletAddress.slice(0, 10)}...{user.walletAddress.slice(-8)}
               </p>
             </div>
           </div>
           
-          <Button 
+          <button 
             onClick={refreshBalance} 
-            variant="secondary" 
-            className="mt-3 w-full"
+            disabled={isLoading}
+            className="mt-3 w-full px-4 py-2 text-sm font-medium text-white rounded-md transition-all shadow-md hover:shadow-lg"
+            style={{ 
+              background: isLoading ? 'rgba(58, 141, 140, 0.5)' : 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+              backgroundSize: '200% auto',
+            }}
           >
-            Actualizar Balance
-          </Button>
+            {isLoading ? 'Actualizando...' : 'Actualizar Balance'}
+          </button>
         </div>
       </div>
       
@@ -235,7 +248,15 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-white">Mis Tokens</h2>
           <Link href="/marketplace">
-            <Button variant="secondary" size="sm">Ver Marketplace</Button>
+            <button 
+              className="px-4 py-2 text-sm font-medium text-white rounded-md shadow-md hover:shadow-lg transition-all"
+              style={{ 
+                background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                backgroundSize: '200% auto',
+              }}
+            >
+              Ver Marketplace
+            </button>
           </Link>
         </div>
         
@@ -245,21 +266,21 @@ export default function DashboardPage() {
           </Card>
         ) : (
           <UserTokensSection 
-  tokens={user.tokens} 
-  marketplaceTokens={tokens} // Pasa los tokens del marketplace
-  onSellToken={(token: TokenBalance) => {
-    // Buscar el token en la lista de tokens disponibles
-    const marketplaceToken = tokens.find(t => 
-      t.token_address.toLowerCase() === token.tokenAddress.toLowerCase()
-    );
-    
-    if (marketplaceToken) {
-      handleSellToken(marketplaceToken);
-    } else {
-      setError("Este token no está disponible en el marketplace actualmente");
-    }
-  }}
-/>
+            tokens={user.tokens} 
+            marketplaceTokens={tokens} // Pasa los tokens del marketplace
+            onSellToken={(token: TokenBalance) => {
+              // Buscar el token en la lista de tokens disponibles
+              const marketplaceToken = tokens.find(t => 
+                t.token_address.toLowerCase() === token.tokenAddress.toLowerCase()
+              );
+              
+              if (marketplaceToken) {
+                handleSellToken(marketplaceToken);
+              } else {
+                setError("Este token no está disponible en el marketplace actualmente");
+              }
+            }}
+          />
         )}
       </section>
       
@@ -290,13 +311,12 @@ export default function DashboardPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         {offer.token?.image_url && (
-                          <div className="h-10 w-10 relative mr-3">
+                          <div className="h-10 w-10 relative mr-3 rounded-lg overflow-hidden">
                             <Image 
                               src={offer.token.image_url} 
                               alt={offer.token?.name || 'Token'} 
                               fill
-                              className="rounded"
-                              style={{ objectFit: 'cover' }}
+                              className="object-cover"
                             />
                           </div>
                         )}
@@ -312,7 +332,7 @@ export default function DashboardPage() {
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         offer.status === 'active' 
-                          ? 'bg-green-900 text-green-300' 
+                          ? 'bg-[#3A8D8C]/20 text-[#8CCA6E]' 
                           : offer.status === 'sold' 
                             ? 'bg-blue-900 text-blue-300'
                             : 'bg-gray-700 text-gray-300'
@@ -323,13 +343,12 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-6 py-4">
                       {offer.status === 'active' && (
-                        <Button 
+                        <button 
                           onClick={() => handleCancelOffer(offer.id)} 
-                          variant="danger"
-                          size="sm"
+                          className="px-3 py-1 text-xs font-medium text-white rounded-md bg-red-600 hover:bg-red-700 transition-colors"
                         >
                           Cancelar
-                        </Button>
+                        </button>
                       )}
                     </td>
                   </tr>

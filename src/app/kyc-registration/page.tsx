@@ -40,7 +40,7 @@ export default function KycRegistrationPage() {
             
             <div className="space-y-4 mb-8">
               <div className="bg-gray-800 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-400 mb-2">¿Qué es el KYC?</h3>
+                <h3 className="font-semibold mb-2" style={{ color: '#71BB87' }}>¿Qué es el KYC?</h3>
                 <p className="text-gray-300 text-sm">
                   KYC (Know Your Customer) es un proceso de verificación de identidad que nos permite confirmar quién eres,
                   protegiendo así a todos los usuarios de nuestra plataforma contra fraudes y actividades ilícitas.
@@ -48,7 +48,7 @@ export default function KycRegistrationPage() {
               </div>
               
               <div className="bg-gray-800 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-400 mb-2">¿Qué necesito para completar el KYC?</h3>
+                <h3 className="font-semibold mb-2" style={{ color: '#71BB87' }}>¿Qué necesito para completar el KYC?</h3>
                 <p className="text-gray-300 text-sm">
                   Necesitarás un documento de identidad oficial (DNI, pasaporte o licencia de conducir) y acceso a una cámara
                   para tomar una fotografía de tu rostro. El proceso toma aproximadamente 5-10 minutos.
@@ -56,13 +56,16 @@ export default function KycRegistrationPage() {
               </div>
             </div>
             
-            <Button 
-              variant="primary" 
+            <button 
               onClick={() => setCurrentStep('form')}
-              fullWidth
+              className="w-full px-4 py-2 text-white font-medium rounded-md shadow-md hover:shadow-lg transition-all"
+              style={{ 
+                background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                backgroundSize: '200% auto',
+              }}
             >
               Comenzar Verificación
-            </Button>
+            </button>
           </div>
         );
       
@@ -81,13 +84,14 @@ export default function KycRegistrationPage() {
             />
             
             {apiResponse && apiResponse.kycLink && (
-              <div className="mt-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-                <p className="text-blue-300 mb-2">Se ha generado tu enlace de verificación:</p>
+              <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: 'rgba(58, 141, 140, 0.15)', borderColor: '#3A8D8C', borderWidth: '1px' }}>
+                <p className="mb-2" style={{ color: '#71BB87' }}>Se ha generado tu enlace de verificación:</p>
                 <a 
                   href={apiResponse.kycLink} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-400 underline"
+                  className="underline"
+                  style={{ color: '#8CCA6E' }}
                 >
                   Abrir Formulario de Verificación
                 </a>
@@ -95,12 +99,16 @@ export default function KycRegistrationPage() {
                   Una vez que hayas completado el formulario, regresa aquí y verifica el estado de tu verificación.
                 </p>
                 <div className="mt-4">
-                  <Button 
-                    variant="secondary" 
+                  <button 
                     onClick={() => setCurrentStep('status')}
+                    className="px-4 py-2 text-white font-medium rounded-md shadow-md hover:shadow-lg transition-all"
+                    style={{ 
+                      background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                      backgroundSize: '200% auto',
+                    }}
                   >
                     He completado el formulario, verificar estado
-                  </Button>
+                  </button>
                 </div>
               </div>
             )}
@@ -124,42 +132,31 @@ export default function KycRegistrationPage() {
             {apiResponse && (
               <div className="mt-6 p-4 bg-gray-800 rounded-lg">
                 <h3 className="font-semibold mb-2">Estado de tu verificación:</h3>
-                {/* <div className="flex items-center gap-2 mb-4">
-                  <span className="font-medium">Estado:</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    apiResponse.status === 'completed' 
-                      ? 'bg-green-900/40 text-green-400' 
-                      : apiResponse.status === 'pending'
-                        ? 'bg-yellow-900/40 text-yellow-400'
-                        : 'bg-red-900/40 text-red-400'
-                  }`}>
-                    {apiResponse.status === 'completed' 
-                      ? 'Completado' 
-                      : apiResponse.status === 'pending'
-                        ? 'Pendiente'
-                        : 'Rechazado'}
-                  </span>
-                </div> */}
+              
                 
                 {apiResponse.status === 'completed' && (
                   <div>
-                    <p className="text-green-400 font-semibold mb-2">
+                    <p className="font-semibold mb-2" style={{ color: '#8CCA6E' }}>
                       ¡Tu verificación ha sido aprobada!
                     </p>
                     <p className="text-gray-300 mb-4">
                       Tu External ID es: <span className="font-mono bg-gray-700 px-2 py-1 rounded">{apiResponse.externalId}</span>
                     </p>
-                    <Button 
-                      variant="primary" 
+                    <button 
                       onClick={() => setCurrentStep('complete')}
+                      className="px-4 py-2 text-white font-medium rounded-md shadow-md hover:shadow-lg transition-all"
+                      style={{ 
+                        background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                        backgroundSize: '200% auto',
+                      }}
                     >
                       Continuar
-                    </Button>
+                    </button>
                   </div>
                 )}
                 
                 {apiResponse.status === 'pending' && (
-                  <p className="text-yellow-400">
+                  <p style={{ color: '#71BB87' }}>
                     Tu verificación está siendo procesada. Por favor, regresa más tarde para verificar el estado.
                   </p>
                 )}
@@ -172,13 +169,13 @@ export default function KycRegistrationPage() {
                     <p className="text-gray-300">
                       Motivo: {apiResponse.rejectionReason || "No se ha proporcionado un motivo específico."}
                     </p>
-                    <Button 
-                      variant="warning" 
+                    <button 
                       onClick={() => setCurrentStep('form')}
-                      className="mt-4"
+                      className="mt-4 px-4 py-2 text-white font-medium rounded-md shadow-md hover:shadow-lg transition-all"
+                      style={{ background: 'linear-gradient(90deg, #FF9B9B 0%, #FF6B6B 100%)' }}
                     >
                       Intentar de nuevo
-                    </Button>
+                    </button>
                   </div>
                 )}
               </div>
@@ -189,8 +186,8 @@ export default function KycRegistrationPage() {
       case 'complete':
         return (
           <div className="text-center">
-            <div className="mb-6 text-green-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: '#8CCA6E' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -213,14 +210,22 @@ export default function KycRegistrationPage() {
             
             <div className="space-y-4">
               <Link href="/login">
-                <Button variant="primary" fullWidth>
+                <button 
+                  className="w-full px-4 py-2 text-white font-medium rounded-md shadow-md hover:shadow-lg transition-all"
+                  style={{ 
+                    background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                    backgroundSize: '200% auto',
+                  }}
+                >
                   Iniciar Sesión
-                </Button>
+                </button>
               </Link>
               <Link href="/">
-                <Button variant="secondary" fullWidth>
+                <button 
+                  className="w-full px-4 py-2 text-white font-medium rounded-md shadow-md hover:shadow-lg transition-all bg-gray-700 hover:bg-gray-600"
+                >
                   Volver al Inicio
-                </Button>
+                </button>
               </Link>
             </div>
           </div>
@@ -240,11 +245,18 @@ export default function KycRegistrationPage() {
             <div className="flex items-center justify-between">
               {['intro', 'form', 'status', 'complete'].map((step, index) => (
                 <div key={step} className="flex flex-col items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    ['intro', 'form', 'status', 'complete'].indexOf(currentStep) >= index 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-700 text-gray-400'
-                  }`}>
+                  <div 
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                      ['intro', 'form', 'status', 'complete'].indexOf(currentStep) >= index 
+                        ? 'text-white' 
+                        : 'bg-gray-700 text-gray-400'
+                    }`}
+                    style={
+                      ['intro', 'form', 'status', 'complete'].indexOf(currentStep) >= index 
+                        ? { background: 'linear-gradient(135deg, #3A8D8C 0%, #8CCA6E 100%)' }
+                        : {}
+                    }
+                  >
                     {index + 1}
                   </div>
                   <span className="text-xs mt-1 text-gray-400">
@@ -257,8 +269,9 @@ export default function KycRegistrationPage() {
             </div>
             <div className="w-full h-1 bg-gray-700 mt-4 rounded-full relative">
               <div 
-                className="absolute h-1 bg-blue-600 rounded-full" 
+                className="absolute h-1 rounded-full" 
                 style={{
+                  background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
                   width: `${
                     currentStep === 'intro' ? '0%' :
                     currentStep === 'form' ? '33%' :
