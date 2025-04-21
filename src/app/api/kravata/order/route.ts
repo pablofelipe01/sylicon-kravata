@@ -18,6 +18,27 @@ interface CreateOrderRequest {
   sellers: Seller[];
 }
 
+// Función para obtener el símbolo del token basado en su nombre
+// Esto debería configurarse según tus tokens disponibles
+function getTokenSymbol(tokenName: string): string {
+  const tokenMap: Record<string, string> = {
+    "Test Kravata Main": "TKM",
+    "WBC": "WBC",
+    "Grupo Capital": "GRUPOCAPITAL",
+    "Inmobiliaria Sylicon III": "ISIII",
+    "TEST_Kravata": "SYL",
+    "Piso Quinto": "PISOQUINTO",
+    "SFI 401/404": "SFI401",
+    "Popsy": "POPSY",
+    "Maquila Zona Franca": "MAQUILAZONAF",
+    "Inmobiliaria Sylicon II": "ISII",
+    "Logic II": "LOGICII"
+    // Añade más mapeos según sea necesario
+  };
+  
+  return tokenMap[tokenName] || tokenName;
+}
+
 // Handler para el endpoint de creación de orden
 export async function POST(request: NextRequest) {
   try {
@@ -33,8 +54,17 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Obtener el símbolo del token correcto basado en el nombre
+    const tokenSymbol = getTokenSymbol(body.token);
+    
+    // Crear el cuerpo de la solicitud con el símbolo del token
+    const requestBody = {
+      ...body,
+      token: tokenSymbol
+    };
+
     // Log para debugging
-    console.log(`Creating order with data:`, body);
+    console.log(`Creating order with data:`, requestBody);
     
     // URL para el endpoint de creación de orden
     const createOrderUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/liquidity/order`;
@@ -47,7 +77,7 @@ export async function POST(request: NextRequest) {
         "x-api-key": process.env.KRAVATA_API_KEY || "",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(requestBody)
     });
 
     // Log para debugging
