@@ -31,14 +31,14 @@ export default function TokenCard({
   
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-xl transition-all hover:shadow-2xl">
-      {/* Imagen del token */}
-      <div className="relative w-full pb-[66.67%] overflow-hidden pt-4 rounded-t-lg">
+      {/* Imagen del token - Sin padding lateral */}
+      <div className="w-full overflow-hidden">
         <Image 
           src={token.image_url || '/placeholder-token.png'} 
           alt={token.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-contain p-3 rounded-lg"
+          width={400}
+          height={300}
+          className="w-full h-auto"
           priority
         />
       </div>
