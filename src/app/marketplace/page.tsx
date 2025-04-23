@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Image from "next/image";
 import { 
   getTokens, 
@@ -13,6 +14,7 @@ import {
 import { initializeMarketplaceData } from "../lib/initialize-data";
 import TokenCard from "../components/marketplace/TokenCard";
 import BuyTokenModal from "../components/marketplace/BuyTokenModal";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Button, Card } from "../components/ui";
 import { useAuth } from "../contexts/AuthContext";
 import { createOrder } from "../lib/api"; // Importar createOrder desde api.ts para Kravata
@@ -185,7 +187,7 @@ export default function MarketplacePage() {
   // Renderizar contenido basado en estado de carga
   if (loadingData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
                style={{ borderColor: '#8CCA6E', borderTopColor: 'transparent' }}></div>
@@ -196,78 +198,80 @@ export default function MarketplacePage() {
   }
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-white">Marketplace de Tokens Inmobiliarios</h1>
-        
-        {user.isLoggedIn && (
-          <div className="bg-gray-800 rounded-lg p-3 flex items-center gap-3">
-            <div>
-              <p className="text-sm text-gray-400">ID: {user.externalId}</p>
-              <p className="text-sm text-gray-400">Balance: <span style={{ color: '#8CCA6E' }} className="font-bold">{user.balance} tokens</span></p>
+    <div className="bg-gray-900 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-white">Marketplace de Tokens Inmobiliarios</h1>
+          
+          {user.isLoggedIn && (
+            <div className="bg-gray-800 rounded-lg p-3 flex items-center gap-3">
+              <div>
+                <p className="text-sm text-gray-400">ID: {user.externalId}</p>
+                <p className="text-sm text-gray-400">Balance: <span style={{ color: '#8CCA6E' }} className="font-bold">{user.balance} tokens</span></p>
+              </div>
+              <button
+                onClick={refreshBalance}
+                disabled={isLoading}
+                className="px-3 py-1 text-sm font-medium text-white rounded-md transition-all"
+                style={{ 
+                  background: isLoading ? 'rgba(58, 141, 140, 0.5)' : 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                  backgroundSize: '200% auto',
+                }}
+              >
+                {isLoading ? 'Actualizando...' : 'Actualizar'}
+              </button>
             </div>
-            <button
-              onClick={refreshBalance}
-              disabled={isLoading}
-              className="px-3 py-1 text-sm font-medium text-white rounded-md transition-all"
-              style={{ 
-                background: isLoading ? 'rgba(58, 141, 140, 0.5)' : 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
-                backgroundSize: '200% auto',
-              }}
-            >
-              {isLoading ? 'Actualizando...' : 'Actualizar'}
-            </button>
-          </div>
-        )}
-      </div>
-      
-      {error && (
-        <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-300">
-          {error}
+          )}
         </div>
-      )}
-      
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-white mb-4">Tokens Disponibles</h2>
         
-        {tokens.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-gray-400">No hay tokens disponibles en el marketplace.</p>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tokens.map(token => {
-              const tokenOffers = getOffersForToken(token.id);
-              
-              // Solo mostrar tokens que tienen ofertas activas
-              if (tokenOffers.length === 0) return null;
-              
-              return (
-                <TokenCard
-                  key={token.id}
-                  token={token}
-                  offers={tokenOffers}
-                  isOwner={isTokenOwner(token.token_address)}
-                  onBuy={handleBuyToken}
-                  view="marketplace" // Especificamos explícitamente que estamos en el marketplace
-                />
-              );
-            })}
+        {error && (
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-300">
+            {error}
           </div>
         )}
+        
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4">Tokens Disponibles</h2>
+          
+          {tokens.length === 0 ? (
+            <Card className="p-8 text-center bg-gray-800 text-gray-400">
+              <p>No hay tokens disponibles en el marketplace.</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tokens.map(token => {
+                const tokenOffers = getOffersForToken(token.id);
+                
+                // Solo mostrar tokens que tienen ofertas activas
+                if (tokenOffers.length === 0) return null;
+                
+                return (
+                  <TokenCard
+                    key={token.id}
+                    token={token}
+                    offers={tokenOffers}
+                    isOwner={isTokenOwner(token.token_address)}
+                    onBuy={handleBuyToken}
+                    view="marketplace" // Especificamos explícitamente que estamos en el marketplace
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+        
+        {/* Modal para comprar tokens */}
+        {selectedOffer && (
+          <BuyTokenModal
+            isOpen={buyModalOpen}
+            onClose={() => setBuyModalOpen(false)}
+            offer={selectedOffer}
+            buyerExternalId={user.externalId}
+            buyerWalletId={user.walletId}
+            onSubmit={handleProcessPurchase}
+          />
+        )}
       </div>
-      
-      {/* Modal para comprar tokens */}
-      {selectedOffer && (
-        <BuyTokenModal
-          isOpen={buyModalOpen}
-          onClose={() => setBuyModalOpen(false)}
-          offer={selectedOffer}
-          buyerExternalId={user.externalId}
-          buyerWalletId={user.walletId}
-          onSubmit={handleProcessPurchase}
-        />
-      )}
     </div>
   );
 }

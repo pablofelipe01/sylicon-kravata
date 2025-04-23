@@ -13,7 +13,7 @@ export default function Header() {
   };
 
   return (
-    <header className="py-4 border-b border-gray-800 bg-gray-900">
+    <header className="py-4 border-b border-gray-800 bg-gray-900 fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
@@ -64,11 +64,7 @@ export default function Header() {
                 Marketplace
               </Link>
             </li>
-            {/* <li>
-              <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors">
-                Mi Cuenta
-              </Link>
-            </li> */}
+           
             <li>
               <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
                 Nosotros
