@@ -39,19 +39,19 @@ export default function UserTokensSection({
         
         return (
           <div key={`${token.tokenAddress}-${index}`} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-            {/* Contenedor de imagen con altura fija mayor */}
-            <div className="relative w-full pb-[75%] overflow-hidden pt-4 rounded-t-lg"> {/* Aumentado a pb-[66.67%] (ratio 3:2) y pt-4 */}
+            {/* Contenedor de imagen sin padding lateral y a ancho completo */}
+            <div className="w-full overflow-hidden">
               {tokenImage ? (
                 <Image
                   src={tokenImage}
                   alt={token.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-contain p-1 rounded-lg" // Aumentado padding a p-3
+                  width={400}
+                  height={300}
+                  className="w-full h-auto"
                   priority
                 />
               ) : (
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center rounded-lg">
+                <div className="w-full aspect-[4/3] bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                   <h3 className="text-2xl font-bold text-white text-center px-4 drop-shadow-lg">
                     {token.name}
                   </h3>
