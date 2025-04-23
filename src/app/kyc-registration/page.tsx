@@ -32,7 +32,7 @@ export default function KycRegistrationPage() {
       case 'intro':
         return (
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-6">Verificación KYC</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Verificación KYC</h2>
             <p className="mb-8 text-gray-300">
               Para operar en Sylicon Marketplace, necesitas completar el proceso de verificación KYC (Know Your Customer).
               Este proceso es necesario para cumplir con las regulaciones y garantizar la seguridad de todas las transacciones.
@@ -72,7 +72,7 @@ export default function KycRegistrationPage() {
       case 'form':
         return (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Obtener Enlace de Verificación</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Obtener Enlace de Verificación</h2>
             <p className="mb-6 text-gray-300">
               A continuación, generaremos un enlace personalizado para que completes tu verificación KYC.
               Ingresa un identificador único que te servirá como tu External ID una vez completado el proceso.
@@ -85,7 +85,7 @@ export default function KycRegistrationPage() {
             
             {apiResponse && apiResponse.kycLink && (
               <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: 'rgba(58, 141, 140, 0.15)', borderColor: '#3A8D8C', borderWidth: '1px' }}>
-                <p className="mb-2" style={{ color: '#71BB87' }}>Se ha generado tu enlace de verificación:</p>
+                <p className="mb-2 text-white" style={{ color: '#71BB87' }}>Se ha generado tu enlace de verificación:</p>
                 <a 
                   href={apiResponse.kycLink} 
                   target="_blank" 
@@ -118,7 +118,7 @@ export default function KycRegistrationPage() {
       case 'status':
         return (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Verificar Estado KYC</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Verificar Estado KYC</h2>
             <p className="mb-6 text-gray-300">
               Comprueba el estado de tu verificación. Una vez aprobada, recibirás tu External ID que podrás usar
               para iniciar sesión en Sylicon Marketplace.
@@ -131,7 +131,7 @@ export default function KycRegistrationPage() {
             
             {apiResponse && (
               <div className="mt-6 p-4 bg-gray-800 rounded-lg">
-                <h3 className="font-semibold mb-2">Estado de tu verificación:</h3>
+                <h3 className="font-semibold text-white mb-2">Estado de tu verificación:</h3>
               
                 
                 {apiResponse.status === 'completed' && (
@@ -192,7 +192,7 @@ export default function KycRegistrationPage() {
               </svg>
             </div>
             
-            <h2 className="text-2xl font-bold mb-4">¡Verificación Completada!</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">¡Verificación Completada!</h2>
             <p className="mb-6 text-gray-300">
               Has completado exitosamente el proceso de verificación KYC. Ahora puedes iniciar sesión en Sylicon Marketplace
               utilizando tu External ID.
@@ -200,7 +200,7 @@ export default function KycRegistrationPage() {
             
             <div className="bg-gray-800 p-4 rounded-lg mb-8">
               <p className="text-gray-300 mb-2">Tu External ID:</p>
-              <div className="font-mono bg-gray-700 px-4 py-2 rounded text-lg mb-4">
+              <div className="font-mono bg-gray-700 px-4 py-2 rounded text-lg mb-4 text-white">
                 {apiResponse?.externalId || "ID no disponible"}
               </div>
               <p className="text-sm text-gray-400">
@@ -237,61 +237,63 @@ export default function KycRegistrationPage() {
   };
   
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-2xl mx-auto">
-        <Card className="bg-gray-900 border border-gray-800">
-          {/* Progress Steps */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              {['intro', 'form', 'status', 'complete'].map((step, index) => (
-                <div key={step} className="flex flex-col items-center">
-                  <div 
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                      ['intro', 'form', 'status', 'complete'].indexOf(currentStep) >= index 
-                        ? 'text-white' 
-                        : 'bg-gray-700 text-gray-400'
-                    }`}
-                    style={
-                      ['intro', 'form', 'status', 'complete'].indexOf(currentStep) >= index 
-                        ? { background: 'linear-gradient(135deg, #3A8D8C 0%, #8CCA6E 100%)' }
-                        : {}
-                    }
-                  >
-                    {index + 1}
+    <div className="bg-gray-900 min-h-screen">
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto">
+          <Card className="bg-gray-900 border border-gray-800">
+            {/* Progress Steps */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                {['intro', 'form', 'status', 'complete'].map((step, index) => (
+                  <div key={step} className="flex flex-col items-center">
+                    <div 
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                        ['intro', 'form', 'status', 'complete'].indexOf(currentStep) >= index 
+                          ? 'text-white' 
+                          : 'bg-gray-700 text-gray-400'
+                      }`}
+                      style={
+                        ['intro', 'form', 'status', 'complete'].indexOf(currentStep) >= index 
+                          ? { background: 'linear-gradient(135deg, #3A8D8C 0%, #8CCA6E 100%)' }
+                          : {}
+                      }
+                    >
+                      {index + 1}
+                    </div>
+                    <span className="text-xs mt-1 text-gray-400">
+                      {index === 0 ? 'Intro' : 
+                      index === 1 ? 'Formulario' : 
+                      index === 2 ? 'Estado' : 'Completado'}
+                    </span>
                   </div>
-                  <span className="text-xs mt-1 text-gray-400">
-                    {index === 0 ? 'Intro' : 
-                     index === 1 ? 'Formulario' : 
-                     index === 2 ? 'Estado' : 'Completado'}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="w-full h-1 bg-gray-700 mt-4 rounded-full relative">
+                <div 
+                  className="absolute h-1 rounded-full" 
+                  style={{
+                    background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                    width: `${
+                      currentStep === 'intro' ? '0%' :
+                      currentStep === 'form' ? '33%' :
+                      currentStep === 'status' ? '66%' : '100%'
+                    }`
+                  }}
+                ></div>
+              </div>
             </div>
-            <div className="w-full h-1 bg-gray-700 mt-4 rounded-full relative">
-              <div 
-                className="absolute h-1 rounded-full" 
-                style={{
-                  background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
-                  width: `${
-                    currentStep === 'intro' ? '0%' :
-                    currentStep === 'form' ? '33%' :
-                    currentStep === 'status' ? '66%' : '100%'
-                  }`
-                }}
-              ></div>
-            </div>
-          </div>
-          
-          {/* Error message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-300">
-              {error}
-            </div>
-          )}
-          
-          {/* Current step content */}
-          {renderStep()}
-        </Card>
+            
+            {/* Error message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-300">
+                {error}
+              </div>
+            )}
+            
+            {/* Current step content */}
+            {renderStep()}
+          </Card>
+        </div>
       </div>
     </div>
   );
