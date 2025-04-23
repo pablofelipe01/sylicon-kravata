@@ -49,7 +49,7 @@ const FAQ = () => {
     <section className="py-16 px-4 bg-gray-900">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Preguntas Frecuentes</h2>
+          <h2 className="text-3xl font-bold mb-4 text-white">Preguntas Frecuentes</h2>
           <div className="h-1 w-20 mx-auto" style={{ background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)' }}></div>
           <p className="mt-4 text-gray-300">Encuentra respuestas a las preguntas más comunes sobre Sylicon y la inversión en tokens inmobiliarios.</p>
         </div>
