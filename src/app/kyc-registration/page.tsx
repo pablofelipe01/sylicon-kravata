@@ -34,8 +34,7 @@ export default function KycRegistrationPage() {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white mb-6">Verificación KYC</h2>
             <p className="mb-8 text-gray-300">
-              Para operar en Sylicon Marketplace, necesitas completar el proceso de verificación KYC (Know Your Customer).
-              Este proceso es necesario para cumplir con las regulaciones y garantizar la seguridad de todas las transacciones.
+            Para operar en Sylicon Marketplace, necesitas completar el proceso de verificación KYC (Know Your Customer). Este proceso es necesario para cumplir con las regulaciones y garantizar la seguridad de todas las transacciones. La aprobación de tu verificación KYC puede tardar entre 15 minutos y 24 horas.
             </p>
             
             <div className="space-y-4 mb-8">
@@ -50,8 +49,7 @@ export default function KycRegistrationPage() {
               <div className="bg-gray-800 p-4 rounded-lg">
                 <h3 className="font-semibold mb-2" style={{ color: '#71BB87' }}>¿Qué necesito para completar el KYC?</h3>
                 <p className="text-gray-300 text-sm">
-                  Necesitarás un documento de identidad oficial (DNI, pasaporte o licencia de conducir) y acceso a una cámara
-                  para tomar una fotografía de tu rostro. El proceso toma aproximadamente 5-10 minutos.
+                Necesitarás un documento de identidad oficial (CC, pasaporte o licencia de conducir), acceso a una cámara para tomar una fotografía de tu rostro y una certificación de tu cuenta bancaria que no tenga clave de acceso. El proceso toma aproximadamente 5-10 minutos.
                 </p>
               </div>
             </div>
@@ -73,10 +71,75 @@ export default function KycRegistrationPage() {
         return (
           <div>
             <h2 className="text-2xl font-bold text-white mb-6">Obtener Enlace de Verificación</h2>
-            <p className="mb-6 text-gray-300">
-              A continuación, generaremos un enlace personalizado para que completes tu verificación KYC.
-              Ingresa un identificador único que te servirá como tu External ID una vez completado el proceso.
-            </p>
+            <div className="mb-6">
+  <p className="text-gray-300 mb-4">
+    A continuación, generaremos un enlace personalizado para que completes tu verificación KYC.
+    Ingresa un identificador único que funcionará como tu External ID en el sistema Sylicon.
+  </p>
+  
+  <div className="bg-gray-800 p-4 rounded-lg mb-4">
+    <h3 className="font-semibold mb-2" style={{ color: '#71BB87' }}>
+      📋 Requisitos del identificador:
+    </h3>
+    <ul className="text-gray-300 space-y-2">
+      <li className="flex items-start">
+        <span className="mr-2">🔒</span>
+        <span>Debe ser personal e intransferible</span>
+      </li>
+      <li className="flex items-start">
+        <span className="mr-2">🔢</span>
+        <span>Mínimo 12 caracteres</span>
+      </li>
+      <li className="flex items-start">
+        <span className="mr-2">🔡</span>
+        <span>Debe incluir una combinación de:
+          <ul className="pl-6 mt-1 space-y-1">
+            <li>• Letras mayúsculas (A-Z)</li>
+            <li>• Letras minúsculas (a-z)</li>
+            <li>• Números (0-9)</li>
+            <li>• Símbolos especiales (@#$%&*)</li>
+          </ul>
+        </span>
+      </li>
+      <li className="flex items-start">
+        <span className="mr-2">⚠️</span>
+        <span>No debe contener nombres propios</span>
+      </li>
+    </ul>
+  </div>
+  
+  <div className="bg-gray-800 p-4 rounded-lg">
+    <h3 className="font-semibold mb-2" style={{ color: '#71BB87' }}>
+      ⚡ Importante:
+    </h3>
+    <p className="text-gray-300 mb-2">
+      Este identificador funcionará como tu clave de acceso al sistema Sylicon, por lo que debes:
+    </p>
+    <ol className="text-gray-300 space-y-2">
+      <li className="flex items-start">
+        <span className="mr-2">🛠️</span>
+        <span>Crearlo tú mismo</span>
+      </li>
+      <li className="flex items-start">
+        <span className="mr-2">🧠</span>
+        <span>Memorizarlo o guardarlo en un lugar seguro</span>
+      </li>
+      <li className="flex items-start">
+        <span className="mr-2">🤐</span>
+        <span>No compartirlo con nadie</span>
+      </li>
+    </ol>
+    
+    <div className="mt-4 p-3 rounded-lg border-l-2" style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)', borderColor: '#71BB87' }}>
+      <p className="text-gray-300">
+        <span className="block font-medium mb-1" style={{ color: '#71BB87' }}>
+          🛡️ La seguridad de tu cuenta y tus datos depende de la protección de este identificador.
+        </span>
+        Una vez completado el proceso KYC, utilizarás este código para todas tus operaciones dentro del sistema.
+      </p>
+    </div>
+  </div>
+</div>
             
             <KycForm 
               onSuccess={handleSuccess}

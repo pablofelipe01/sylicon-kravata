@@ -98,7 +98,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-2 text-white">Liquidez Inmediata</h3>
-              <p className="text-gray-300">Compra y vende tus tokens en cualquier momento, sin los largos procesos de una venta inmobiliaria tradicional.</p>
+              <p className="text-gray-300">Compra y vende tus tokens en cualquier momento, sin los largos procesos de una venta inmobiliaria tradicional. Pero recuerda, mientras más tiempo mantengas tus activos (Tokens), más incrementas tu patrimonio.</p>
             </div>
             
             <div className="bg-gray-800 p-6 rounded-lg">
@@ -108,7 +108,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-2 text-white">Seguridad Blockchain</h3>
-              <p className="text-gray-300">Tus inversiones están respaldadas por contratos inteligentes en blockchain, garantizando transparencia y seguridad.</p>
+              <p className="text-gray-300">Tus inversiones están respaldadas por contratos inteligentes en blockchain, garantizando transparencia y seguridad, con la vigilancia y regulación del sistema financiero tradicional. No utilizamos criptomonedas, sino un sistema híbrido que combina la innovación tecnológica con la solidez de la banca establecida.</p>
             </div>
           </div>
         </div>

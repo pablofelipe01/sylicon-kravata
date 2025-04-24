@@ -115,8 +115,10 @@ export default function TokenCard({
                 <div>
                   <div className="text-sm text-white">{offer.quantity} tokens</div>
                   <div className="text-xs text-gray-400">
-                    Vendedor: {offer.seller?.external_id || offer.seller_id.slice(0, 8)}
-                  </div>
+  Vendedor: {offer.seller?.wallet_address 
+    ? `${offer.seller.wallet_address.slice(0, 6)}....${offer.seller.wallet_address.slice(-4)}` 
+    : offer.seller_id.slice(0, 8)}
+</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-sm font-bold" style={{ color: '#8CCA6E' }}>

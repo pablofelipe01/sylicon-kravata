@@ -21,7 +21,7 @@ const FAQ = () => {
     },
     {
       question: "¿Cómo funciona la compra de tokens inmobiliarios en la plataforma?",
-      answer: "Para comprar tokens inmobiliarios, primero debes registrarte en nuestra plataforma y completar el proceso de verificación de identidad. Una vez verificado, debes conectar o crear tu billetera digital. Posteriormente, puedes navegar por las propiedades disponibles y seleccionar la oferta de tokens que deseas comprar. El pago lo realizas a través de tu billetera digital. Después de completar la transacción, los tokens se acreditarán en tu billetera digital automáticamente."
+      answer: "Para comprar tokens inmobiliarios, primero debes registrarte en nuestra plataforma y completar el proceso de verificación de identidad. Una vez verificado, puedes empezar a comprar tokens inmobiliarios navegando por las propiedades disponibles y seleccionando la oferta que desees. Después de completar la transacción, los tokens se acreditarán en tu cuenta automáticamente."
     },
     {
       question: "¿Es seguro invertir en tokens inmobiliarios a través de la blockchain?",
