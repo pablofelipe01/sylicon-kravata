@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+import ChatBotIcon from "./components/layout/ChatBotIcon"; // Importa el componente
 import { AuthProvider } from "./contexts/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,6 +27,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <ChatBotIcon /> {/* Añade el componente ChatBotIcon aquí dentro del AuthProvider */}
         </AuthProvider>
       </body>
     </html>
