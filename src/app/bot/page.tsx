@@ -80,7 +80,7 @@ export default function Home() {
       };
       
       // Send the message to n8n webhook
-      const response = await fetch("https://n8n-siriusagentic-u38879.vm.elestio.app/webhook-test/sily", {
+      const response = await fetch("https://n8n-siriusagentic-u38879.vm.elestio.app/webhook/sily", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
