@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 export default function AdminTicketsPage() {
-  const { data: session, status } = useSession();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
+  
+  // Estado de autenticación local
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loginCredentials, setLoginCredentials] = useState({
+    username: "",
+    password: ""
+  });
   
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -27,28 +34,50 @@ export default function AdminTicketsPage() {
   const [newStatus, setNewStatus] = useState("");
   const [adminComment, setAdminComment] = useState("");
   
-  // Comprobar si el usuario está autenticado y es administrador
+  // Verificar si hay una sesión de administrador guardada
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?redirect=/admin/tickets");
-    } else if (session && session.user && session.user.role !== "admin") {
-      router.push("/dashboard");
-      toast.error("No tienes permisos para acceder a esta página");
+    const savedAdminSession = localStorage.getItem('adminSession');
+    if (savedAdminSession === 'true') {
+      setIsAdmin(true);
     }
-  }, [session, status, router]);
+  }, []);
   
-  // Cargar tickets
+  // Cargar tickets si está autenticado
   useEffect(() => {
-    if (status === "authenticated" && session.user.role === "admin") {
+    if (isAdmin) {
       fetchTickets();
     }
-  }, [session, status, pagination.page, filters]);
+  }, [isAdmin, pagination.page, filters]);
+  
+  // Función para iniciar sesión
+  const handleLogin = (e) => {
+    e.preventDefault();
+    
+    // Credenciales de administrador (solo para desarrollo)
+    // En producción, esto debería validarse contra una base de datos o servicio
+    if (loginCredentials.username === "admin" && loginCredentials.password === "sylicon2024") {
+      setIsAdmin(true);
+      localStorage.setItem('adminSession', 'true');
+      toast.success("Sesión de administrador iniciada");
+    } else {
+      toast.error("Credenciales incorrectas");
+    }
+  };
+  
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    setIsAdmin(false);
+    localStorage.removeItem('adminSession');
+    toast.success("Sesión cerrada");
+  };
   
   // Función para cargar tickets
   const fetchTickets = async () => {
     try {
       setLoading(true);
+      setApiError(false);
       
+      // Construir parámetros de consulta
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString()
@@ -62,10 +91,11 @@ export default function AdminTicketsPage() {
         params.append("search", filters.search);
       }
       
+      // Obtener tickets desde la API
       const response = await fetch(`/api/admin/tickets?${params.toString()}`);
       
       if (!response.ok) {
-        throw new Error("Error al cargar los tickets");
+        throw new Error(`Error: ${response.status} - ${await response.text()}`);
       }
       
       const data = await response.json();
@@ -77,8 +107,50 @@ export default function AdminTicketsPage() {
       }));
       
     } catch (error) {
-      toast.error(error.message);
       console.error("Error fetching tickets:", error);
+      
+      setApiError(true);
+      // Si la API falla, mostrar datos de ejemplo solo para desarrollo
+      if (process.env.NODE_ENV === 'development') {
+        const mockTickets = [
+          {
+            id: "1",
+            ticketNumber: "TK-123456-7890",
+            tipoProblema: "Compré tokens pero no llegaron a mi billetera",
+            externalId: "EXT-12345",
+            correo: "usuario@example.com",
+            estado: "pendiente",
+            comentarios: "Compré 10 tokens pero no se reflejan en mi cuenta",
+            fechaCreacion: new Date().toISOString(),
+            ultimaActualizacion: new Date().toISOString(),
+            archivos: [
+              { filename: "captura1.png", url: "#" }
+            ]
+          },
+          {
+            id: "2",
+            ticketNumber: "TK-234567-8901",
+            tipoProblema: "Error: No se pudo obtener la URL de pago PSE",
+            documento: "1234567890",
+            correo: "otro@example.com",
+            estado: "en_revision",
+            comentarios: "Intenté realizar el pago pero me sale error",
+            fechaCreacion: new Date().toISOString(),
+            ultimaActualizacion: new Date().toISOString()
+          }
+        ];
+        
+        setTickets(mockTickets);
+        setPagination(prevState => ({
+          ...prevState,
+          total: mockTickets.length,
+          totalPages: 1
+        }));
+        
+        toast.error("Error al conectar con la API. Mostrando datos de ejemplo");
+      } else {
+        toast.error("Error al cargar los tickets");
+      }
     } finally {
       setLoading(false);
     }
@@ -119,7 +191,7 @@ export default function AdminTicketsPage() {
   const openTicketDetails = (ticket) => {
     setSelectedTicket(ticket);
     setNewStatus(ticket.estado);
-    setAdminComment("");
+    setAdminComment(ticket.comentarioAdmin || "");
   };
   
   // Cerrar modal de detalles
@@ -152,16 +224,74 @@ export default function AdminTicketsPage() {
       fetchTickets();
       
     } catch (error) {
-      toast.error(error.message);
       console.error("Error updating ticket:", error);
+      
+      if (apiError) {
+        // Si la API no está disponible, simular la actualización solo para desarrollo
+        toast.success("Simulando actualización (solo para desarrollo)");
+        closeTicketDetails();
+        fetchTickets();
+      } else {
+        toast.error(error.message || "Error al actualizar el ticket");
+      }
     }
   };
   
-  // Si el usuario no está autenticado o está cargando la sesión
-  if (status === "loading" || (status === "authenticated" && session.user.role !== "admin")) {
+  // Si no está autenticado, mostrar formulario de login
+  if (!isAdmin) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      <div className="pt-20 min-h-screen bg-gray-900 text-white">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-md mx-auto bg-gray-800 rounded-lg p-8 shadow-lg">
+            <h1 className="text-2xl font-bold mb-6 text-center">Panel de Administración</h1>
+            <form onSubmit={handleLogin}>
+              <div className="mb-4">
+                <label htmlFor="username" className="block text-gray-300 mb-2">
+                  Usuario
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  value={loginCredentials.username}
+                  onChange={(e) => setLoginCredentials({...loginCredentials, username: e.target.value})}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+              
+              <div className="mb-6">
+                <label htmlFor="password" className="block text-gray-300 mb-2">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={loginCredentials.password}
+                  onChange={(e) => setLoginCredentials({...loginCredentials, password: e.target.value})}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full px-6 py-3 font-medium text-white rounded-md shadow-md hover:shadow-lg transition-all"
+                style={{ 
+                  background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)',
+                  backgroundSize: '200% auto',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundPosition = 'right center';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundPosition = 'left center';
+                }}
+              >
+                Iniciar Sesión
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     );
   }
@@ -197,10 +327,25 @@ export default function AdminTicketsPage() {
     return statusMap[estado] || "bg-gray-500";
   };
   
+  // Interfaz de administrador
   return (
     <div className="pt-20 min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Gestión de Tickets de Soporte</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Gestión de Tickets de Soporte</h1>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+        
+        {apiError && (
+          <div className="bg-orange-900 bg-opacity-20 border border-orange-800 text-orange-200 p-4 rounded-md mb-6">
+            ⚠️ Modo de desarrollo: No se pudo conectar con la API. Mostrando datos de ejemplo.
+          </div>
+        )}
         
         {/* Filtros */}
         <div className="bg-gray-800 rounded-lg shadow-lg p-4 mb-6">
@@ -442,6 +587,7 @@ export default function AdminTicketsPage() {
                   <div className="bg-gray-700 p-4 rounded-md">
                     <ul className="space-y-2">
                       {selectedTicket.archivos.map((archivo, index) => (
+                     
                         <li key={index} className="flex items-center">
                           <svg 
                             xmlns="http://www.w3.org/2000/svg" 
@@ -468,6 +614,16 @@ export default function AdminTicketsPage() {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                </div>
+              )}
+              
+              {/* Comentario administrativo anterior si existe */}
+              {selectedTicket.comentarioAdmin && (
+                <div className="mb-6">
+                  <p className="text-gray-400 text-sm mb-2">Comentario Administrativo Anterior</p>
+                  <div className="bg-gray-700 p-4 rounded-md border-l-4 border-green-500">
+                    <p className="text-white whitespace-pre-wrap">{selectedTicket.comentarioAdmin}</p>
                   </div>
                 </div>
               )}
