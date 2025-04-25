@@ -30,7 +30,7 @@ export default function HomePage() {
               Invierte en el futuro inmobiliario con tokens digitales
             </h1>
             <p className="text-xl text-gray-300 mb-8">
-              Compra y vende fracciones de propiedades inmobiliarias a través de tokens seguros respaldados por blockchain.
+              Compra y vende fracciones de propiedades inmobiliarias a través de tokens seguros respaldados por blockchain. En pesos Colombianos.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/marketplace">
