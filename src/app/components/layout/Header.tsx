@@ -64,7 +64,6 @@ export default function Header() {
                 Marketplace
               </Link>
             </li>
-           
             <li>
               <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
                 Nosotros
@@ -73,6 +72,11 @@ export default function Header() {
             <li>
               <Link href="/contacto" className="text-gray-300 hover:text-white transition-colors">
                 Contacto
+              </Link>
+            </li>
+            <li>
+              <Link href="/reportar-problema" className="text-gray-300 hover:text-white transition-colors">
+                Reportar Problema
               </Link>
             </li>
           </ul>
@@ -128,6 +132,15 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contacto
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/reportar-problema" 
+                className="block text-gray-300 hover:text-white transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Reportar Problema
               </Link>
             </li>
           </ul>

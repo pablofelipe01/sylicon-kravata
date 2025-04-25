@@ -1,10 +1,12 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
-import ChatBotIcon from "./components/layout/ChatBotIcon"; // Importa el componente
+import ChatBotIcon from "./components/layout/ChatBotIcon";
 import { AuthProvider } from "./contexts/AuthContext";
+import { NextAuthProvider } from "./providers"; // Nuevo componente que crearemos
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,14 +23,16 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.className} bg-gray-900 text-white min-h-screen flex flex-col`}>
-        <AuthProvider>
-          <Header />
-          <main className="flex-grow pt-20">
-            {children}
-          </main>
-          <Footer />
-          <ChatBotIcon /> {/* Añade el componente ChatBotIcon aquí dentro del AuthProvider */}
-        </AuthProvider>
+        <NextAuthProvider> {/* Añadimos NextAuthProvider alrededor de todo */}
+          <AuthProvider>
+            <Header />
+            <main className="flex-grow pt-20">
+              {children}
+            </main>
+            <Footer />
+            <ChatBotIcon />
+          </AuthProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );
