@@ -69,8 +69,15 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
       console.log("Respuesta recibida:", data);
       onSuccess(data);
       
+      // Modificado aquí: usar window.location.href en lugar de window.open
       if (data.kycLink) {
-        window.open(data.kycLink, '_blank');
+        // Registrar información sobre dispositivo para debugging
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        console.log(`Dispositivo: ${isMobile ? 'Móvil' : 'Desktop'}`);
+        console.log(`Redirigiendo a URL KYC: ${data.kycLink}`);
+        
+        // Redireccionar a la URL KYC
+        window.location.href = data.kycLink;
       }
     } catch (err) {
       console.error("Error en KycForm:", err);
