@@ -15,12 +15,24 @@ import {
 } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import SellTokenModal from "../components/marketplace/SellTokenModal";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Button, Card } from "../components/ui";
 import { formatCurrency } from "../lib/formatters";
 import { useRouter } from "next/navigation";
 import UserTransactionHistory from "../components/features/transactions/UserTransactionHistory";
 import UserTokensSection from "../components/features/tokens/UserTokensSection";
 import { TokenBalance } from "../types";
+
+// Función para enmascarar el ID, mostrando solo los primeros 2 y últimos 1 caracteres
+const maskExternalId = (id: string): string => {
+  if (!id || id.length < 4) return id;
+  
+  const firstPart = id.substring(0, 2);
+  const lastPart = id.substring(id.length - 1);
+  const maskedPart = '.'.repeat(id.length - 3);
+  
+  return `${firstPart}${maskedPart}${lastPart}`;
+};
 
 export default function DashboardPage() {
   const { user, refreshBalance, isLoading } = useAuth();
@@ -218,7 +230,10 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-400">ID: {user.externalId}</p>
+                <p className="text-sm text-gray-400">
+                  ID: <span className="font-mono">{maskExternalId(user.externalId)}</span>
+                  <span className="ml-1 text-xs text-gray-500">(oculto)</span>
+                </p>
                 <p className="text-xl font-bold text-white">{user.balance} <span style={{ color: '#8CCA6E' }}>Tokens</span></p>
                 <p className="text-xs text-gray-500 truncate max-w-xs">
                   {user.walletAddress.slice(0, 10)}...{user.walletAddress.slice(-8)}

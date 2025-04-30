@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Button, Card } from '../components/ui';
 import KycForm from '../components/features/kyc/KycForm';
 import KycStatus from '../components/features/kyc/KycStatus';
@@ -97,7 +98,7 @@ export default function KycRegistrationPage() {
             <li>• Letras mayúsculas (A-Z)</li>
             <li>• Letras minúsculas (a-z)</li>
             <li>• Números (0-9)</li>
-            <li>• Símbolos especiales (solo se permiten: @, #, $, %, &, *)</li>
+            <li>• Símbolos especiales (solo se permiten: @, !, $, %, &, *)</li>
           </ul>
         </span>
       </li>

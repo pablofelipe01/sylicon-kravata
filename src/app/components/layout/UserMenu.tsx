@@ -6,6 +6,17 @@ import { truncateAddress } from '@/app/lib/formatters';
 import LoginModal from '../login/LoginModal';
 import Link from 'next/link';
 
+// Función para enmascarar el ID, mostrando solo los primeros 2 y últimos 1 caracteres
+const maskExternalId = (id: string): string => {
+  if (!id || id.length < 4) return id;
+  
+  const firstPart = id.substring(0, 2);
+  const lastPart = id.substring(id.length - 1);
+  const maskedPart = '.'.repeat(id.length - 3);
+  
+  return `${firstPart}${maskedPart}${lastPart}`;
+};
+
 export default function UserMenu() {
   const { user, logout, refreshBalance, isLoading } = useAuth();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -15,6 +26,7 @@ export default function UserMenu() {
     try {
       await login(externalId);
       setLoginModalOpen(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // Error ya manejado por el contexto de autenticación
     }
@@ -42,7 +54,7 @@ export default function UserMenu() {
               </svg>
             </div>
             <div className="text-left">
-              <p className="text-xs text-white font-semibold">{user.externalId}</p>
+              <p className="text-xs text-white font-semibold font-mono">{maskExternalId(user.externalId)}</p>
               <p className="text-xs text-gray-400">{truncateAddress(user.walletAddress, 4)}</p>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,6 +65,9 @@ export default function UserMenu() {
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
               <div className="py-1">
+                <div className="block px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                  ID: <span className="font-mono">{maskExternalId(user.externalId)}</span>
+                </div>
                 <Link 
                   href="/dashboard" 
                   className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"

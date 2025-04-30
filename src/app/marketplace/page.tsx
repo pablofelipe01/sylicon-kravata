@@ -21,6 +21,17 @@ import { createOrder } from "../lib/api"; // Importar createOrder desde api.ts p
 import { CreateOrderRequest } from "../types";
 import { getTokenSymbol } from "../lib/tokenMapping"; // Importar la función de mapeo
 
+// Función para enmascarar el ID, mostrando solo los primeros 2 y últimos 1 caracteres
+const maskExternalId = (id: string): string => {
+  if (!id || id.length < 4) return id;
+  
+  const firstPart = id.substring(0, 2);
+  const lastPart = id.substring(id.length - 1);
+  const maskedPart = '.'.repeat(id.length - 3);
+  
+  return `${firstPart}${maskedPart}${lastPart}`;
+};
+
 export default function MarketplacePage() {
   const { user, refreshBalance, isLoading } = useAuth();
   
@@ -206,7 +217,10 @@ export default function MarketplacePage() {
           {user.isLoggedIn && (
             <div className="bg-gray-800 rounded-lg p-3 flex items-center gap-3">
               <div>
-                <p className="text-sm text-gray-400">ID: {user.externalId}</p>
+                <p className="text-sm text-gray-400">
+                  ID: <span className="font-mono">{maskExternalId(user.externalId)}</span>
+                  <span className="ml-1 text-xs text-gray-500">(oculto por seguridad)</span>
+                </p>
                 <p className="text-sm text-gray-400">Balance: <span style={{ color: '#8CCA6E' }} className="font-bold">{user.balance} tokens</span></p>
               </div>
               <button
