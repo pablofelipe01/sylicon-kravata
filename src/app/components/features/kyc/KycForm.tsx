@@ -20,18 +20,24 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
     hasUppercase: false,
     hasLowercase: false, 
     hasNumber: false,
-    hasSymbol: false
+    hasSymbol: false,
+    hasValidChars: true // Nueva validación para caracteres permitidos
   });
 
   // Validar cada requisito individualmente
   useEffect(() => {
     if (touched || externalId.length > 0) {
+      // Verificar si solo contiene caracteres permitidos
+      const hasInvalidChars = /[^a-zA-Z0-9@#$%&*]/.test(externalId);
+      
       setValidations({
         minLength: externalId.length >= 12,
         hasUppercase: /[A-Z]/.test(externalId),
         hasLowercase: /[a-z]/.test(externalId),
         hasNumber: /[0-9]/.test(externalId),
-        hasSymbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(externalId)
+        // Solo permitir @#$%&* como caracteres especiales
+        hasSymbol: /[@#$%&*]/.test(externalId),
+        hasValidChars: !hasInvalidChars
       });
     }
   }, [externalId, touched]);
@@ -48,7 +54,8 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
       console.log("Mayúsculas:", /[A-Z]/.test(externalId));
       console.log("Minúsculas:", /[a-z]/.test(externalId));
       console.log("Números:", /[0-9]/.test(externalId));
-      console.log("Símbolos:", /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(externalId));
+      console.log("Símbolos permitidos:", /[@#$%&*]/.test(externalId));
+      console.log("Solo caracteres válidos:", !(/[^a-zA-Z0-9@#$%&*]/.test(externalId)));
     }
   }, [validations, isValid, externalId]);
 
@@ -87,11 +94,11 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
     }
   };
 
-  // Verificación manual de símbolo (por si la expresión regular da problemas)
+  // Verificación manual de símbolo (limitado a @#$%&*)
   const hasSymbolCheck = () => {
-    const symbols = "!@#$%^&*()_+-=[]{};':\"\\|,.<>/?";
+    const allowedSymbols = "@#$%&*";
     for (let i = 0; i < externalId.length; i++) {
-      if (symbols.includes(externalId[i])) {
+      if (allowedSymbols.includes(externalId[i])) {
         return true;
       }
     }
@@ -116,7 +123,7 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
         value={externalId}
         onChange={(e) => setExternalId(e.target.value)}
         onFocus={() => setTouched(true)}
-        placeholder="Ej: A3b$Tr9pK2x#5z (mín. 12 caracteres )"
+        placeholder="SZ7ZTd4XUqjU$@"
         required
         error={touched && !isValid && externalId.length > 0}
       />
@@ -173,8 +180,16 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
               >
                 {validations.hasSymbol ? '✓' : '✗'}
               </span>
-              Al menos un símbolo especial (@#$%&* etc.)
+              Al menos un símbolo especial (solo @, #, $, %, &, *)
             </li>
+            {!validations.hasValidChars && (
+              <li className="flex items-center text-red-400">
+                <span className="inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-red-500/20 text-red-400">
+                  ✗
+                </span>
+                Solo se permiten letras, números y los símbolos @, #, $, %, &, *
+              </li>
+            )}
           </ul>
         </div>
       )}
