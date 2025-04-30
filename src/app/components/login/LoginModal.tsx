@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { Input, Button } from '../ui'; // Corregido: Cambiado de '../components/ui' a '../../ui'
-import { useAuth } from '../../contexts/AuthContext'; // También necesita ajustarse
+import { Input, Button } from '../ui';
+import { useAuth } from '../../contexts/AuthContext';
 import Link from 'next/link';
+import KycStatusToggle from '../features/kyc/KycStatusToggle';
 
 export default function LoginModal({ isOpen, onClose }) {
   const [externalId, setExternalId] = useState('');
@@ -19,6 +20,7 @@ export default function LoginModal({ isOpen, onClose }) {
     try {
       await login(externalId);
       onClose();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError('ID no válido. Por favor, verifica e intenta de nuevo.');
     } finally {
@@ -26,11 +28,23 @@ export default function LoginModal({ isOpen, onClose }) {
     }
   };
 
+  // Manejadores para el componente KycStatusToggle
+  const handleKycStatusSuccess = (data) => {
+    if (data && data.status === 'completed' && data.externalId) {
+      setExternalId(data.externalId);
+      setError(null);
+    }
+  };
+
+  const handleKycStatusError = (errorMsg) => {
+    setError(errorMsg);
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-6 text-white">Iniciar Sesión</h2>
         
         {error && (
@@ -48,32 +62,13 @@ export default function LoginModal({ isOpen, onClose }) {
               id="externalId"
               value={externalId}
               onChange={(e) => setExternalId(e.target.value)}
-              placeholder="Ingresa tu ID"
+              placeholder="SZ7ZTd4XUqjU$@"
               required
               className="w-full"
             />
             <p className="mt-2 text-sm text-gray-400">
-              Este ID es tu Identificación aprobada por Kravata después del proceso KYC.
+              Este ID es tu Identificación aprobada después del proceso KYC.
             </p>
-          </div>
-          
-          <div className="mb-4">
-            {/* <h3 className="text-sm font-medium text-gray-300 mb-2">IDs disponibles para pruebas:</h3> */}
-            <div className="flex flex-wrap gap-2">
-              {[].map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setExternalId(id)}
-                  className="px-3 py-1 text-xs rounded bg-gray-700 text-gray-300 hover:bg-gray-600"
-                >
-                  {id}
-                </button>
-              ))}
-            </div>
-            {/* <p className="mt-2 text-xs text-blue-400">
-              * Estos son los IDs que ya han completado el proceso KYC en Kravata.
-            </p> */}
           </div>
           
           <div className="mt-6 flex flex-col gap-4">
@@ -108,19 +103,26 @@ export default function LoginModal({ isOpen, onClose }) {
                 }}
               ></span>
             </button>
-            
-            <div className="text-center">
-              <p className="text-gray-400 text-sm mb-2">¿No tienes una cuenta?</p>
-              <Link 
-                href="/kyc-registration" 
-                className="text-[#71BB87] hover:text-[#8CCA6E] text-sm font-medium"
-                onClick={onClose}
-              >
-                Completa el proceso KYC para obtener tu ID
-              </Link>
-            </div>
           </div>
         </form>
+        
+        <div className="mt-4 border-t border-gray-700 pt-4">
+          <KycStatusToggle
+            onSuccess={handleKycStatusSuccess}
+            onError={handleKycStatusError}
+          />
+        </div>
+        
+        <div className="mt-4 text-center">
+          <p className="text-gray-400 text-sm mb-2">¿No tienes una cuenta?</p>
+          <Link 
+            href="/kyc-registration" 
+            className="text-[#71BB87] hover:text-[#8CCA6E] text-sm font-medium"
+            onClick={onClose}
+          >
+            Completa el proceso KYC para obtener tu ID
+          </Link>
+        </div>
         
         <div className="mt-6 border-t border-gray-700 pt-4">
           <Button 

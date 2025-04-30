@@ -31,7 +31,7 @@ export default function KycStatus({ onSuccess, onError }: KycStatusProps) {
       onSuccess(data);
     } catch (err) {
       console.error("Error en KycStatus:", err);
-      onError(err instanceof Error ? err.message : 'An unknown error occurred');
+      onError(err instanceof Error ? err.message : 'Ha ocurrido un error inesperado');
     } finally {
       setLoading(false);
     }
@@ -39,54 +39,33 @@ export default function KycStatus({ onSuccess, onError }: KycStatusProps) {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="mb-6">
+      <form onSubmit={handleSubmit} className="mb-3">
         <Input
-          id="externalId"
-          label="External ID:"
+          id="kycStatusId"
+          label=""
           value={externalId}
           onChange={(e) => setExternalId(e.target.value)}
-          placeholder="Ingresa el ID a verificar"
+          placeholder="SZ7ZTd4XUqjU$@"
           required
+          className="mb-2"
         />
-        
-        <div className="mt-2 mb-4">
-          <h3 className="text-sm font-medium text-gray-300 mb-2">IDs de prueba disponibles:</h3>
-          <div className="flex flex-wrap gap-2">
-            {[].map((id) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setExternalId(id)}
-                className="px-3 py-1 text-xs rounded bg-gray-700 text-gray-300 hover:bg-gray-600"
-              >
-                {id}
-              </button>
-            ))}
-          </div>
-        </div>
         
         <Button 
           type="submit"
           variant="secondary"
           fullWidth
           loading={loading}
+          className="mt-2"
         >
-          Verificar Estado KYC
+          Verificar Estado
         </Button>
       </form>
       
       {responseData && (
-        <div className="mt-6 p-4 bg-gray-800 rounded-lg">
-          <h3 className="font-semibold mb-4">Estado de tu verificación:</h3>
-          
-          <div className="flex items-center gap-2 mb-4">
-            <span className="font-medium">Status Original:</span>
-            <code className="bg-gray-700 px-2 py-1 rounded text-white">{responseData.status}</code>
-          </div>
-          
-          {/* <div className="flex items-center gap-2 mb-4">
-            <span className="font-medium">Estado mostrado:</span>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+        <div className="mt-3 p-3 bg-gray-800 rounded-lg text-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-medium">Estado:</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
               responseData.status === 'completed' 
                 ? 'bg-green-900/40 text-green-400' 
                 : responseData.status === 'pending'
@@ -99,16 +78,23 @@ export default function KycStatus({ onSuccess, onError }: KycStatusProps) {
                   ? 'Pendiente'
                   : 'Rechazado'}
             </span>
-          </div> */}
-          
-          <div className="mt-4 p-3 bg-gray-900 rounded border border-gray-700">
-            <details>
-              <summary className="cursor-pointer text-sm text-blue-400">Ver respuesta completa de API</summary>
-              <pre className="mt-2 text-xs text-gray-300 overflow-auto max-h-48">
-                {JSON.stringify(responseData, null, 2)}
-              </pre>
-            </details>
           </div>
+          
+          {responseData.status === 'completed' && responseData.externalId && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-medium">External ID:</span>
+              <code className="bg-gray-700 px-2 py-0.5 rounded text-green-300 font-mono text-xs">{responseData.externalId}</code>
+            </div>
+          )}
+          
+          {responseData.status === 'rejected' && responseData.rejectionReason && (
+            <div className="flex flex-col gap-1 mb-2">
+              <span className="font-medium">Motivo:</span>
+              <div className="bg-red-900/20 border border-red-800 p-2 rounded text-red-300 text-xs">
+                {responseData.rejectionReason}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
