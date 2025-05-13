@@ -192,4 +192,4 @@ Consulta la [guía de despliegue de Next.js](https://nextjs.org/docs/app/buildin
 
 Desarrollado con ❤️ por **Pablo Felipe Acevedo Cuellar**
 ```
-
+Estamos en Beta test
