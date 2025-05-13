@@ -77,6 +77,7 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
   // Función para obtener el estilo del estado
   const getStatusStyle = (status: string) => {
     const statusMap: {[key: string]: string} = {
+      'INITIATED': 'bg-yellow-800/40 text-yellow-300',
       'PENDING': 'bg-yellow-900/40 text-yellow-300',
       'COMPLETED': 'bg-green-900/40 text-green-300',
       'CANCELLED': 'bg-red-900/40 text-red-300'
@@ -88,7 +89,8 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
   // Función para obtener el texto del estado en español
   const getStatusText = (status: string) => {
     const statusMap: {[key: string]: string} = {
-      'PENDING': 'Pendiente',
+      'INITIATED': 'Iniciada',
+      'PENDING': 'En Proceso',
       'COMPLETED': 'Completada',
       'CANCELLED': 'Cancelada'
     };
