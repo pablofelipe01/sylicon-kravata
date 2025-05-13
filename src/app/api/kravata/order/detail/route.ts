@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
       try {
         errorText = await response.text();
         console.error(`API Error: ${errorText}`);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         console.error("Could not read error response");
       }

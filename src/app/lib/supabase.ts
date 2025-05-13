@@ -138,7 +138,7 @@ export const createOrUpdateSeller = async (seller: Omit<Seller, 'id' | 'created_
   }
 };
 
-// Función para sincronizar datos del vendedor (añadida aquí para corregir el error de exportación)
+// Función para sincronizar datos del vendedor
 export const syncSellerData = async (externalId: string, walletId: string, walletAddress: string) => {
   try {
     const { data: existingSeller, error: fetchError } = await supabase
@@ -221,6 +221,25 @@ export const getOffersByToken = async (tokenId: string): Promise<Offer[]> => {
   return data || [];
 };
 
+export const getOfferById = async (offerId: string): Promise<Offer | null> => {
+  const { data, error } = await supabase
+    .from('offers')
+    .select(`
+      *,
+      token:token_id(*),
+      seller:seller_id(*)
+    `)
+    .eq('id', offerId)
+    .single();
+  
+  if (error) {
+    if (error.code === 'PGRST116') return null; // No se encontró la oferta
+    throw error;
+  }
+  
+  return data;
+};
+
 export const getOffersBySeller = async (sellerId: string): Promise<Offer[]> => {
   const { data, error } = await supabase
     .from('offers')
@@ -268,18 +287,23 @@ export const updateOfferStatus = async (offerId: string, status: Offer['status']
   return data;
 };
 
-// Orders
-export const createOrder = async (order: Omit<Order, 'id' | 'created_at' | 'updated_at' | 'offer'>): Promise<Order> => {
+// Nueva función para actualizar la cantidad de una oferta
+export const updateOfferQuantity = async (offerId: string, newQuantity: number): Promise<Offer> => {
+  // Si quantity es 0, marcar como sold, de lo contrario mantener como active
+  const status = newQuantity === 0 ? 'sold' : 'active';
+  
   const { data, error } = await supabase
-    .from('orders')
-    .insert(order)
+    .from('offers')
+    .update({
+      quantity: newQuantity,
+      status: status,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', offerId)
     .select(`
       *,
-      offer:offer_id(
-        *,
-        token:token_id(*),
-        seller:seller_id(*)
-      )
+      token:token_id(*),
+      seller:seller_id(*)
     `)
     .single();
   
@@ -287,8 +311,59 @@ export const createOrder = async (order: Omit<Order, 'id' | 'created_at' | 'upda
   return data;
 };
 
+// Orders
+export const createOrder = async (order: Omit<Order, 'id' | 'created_at' | 'updated_at' | 'offer'>): Promise<Order> => {
+  try {
+    // Obtener la oferta para verificar disponibilidad
+    const { data: offer, error: offerError } = await supabase
+      .from('offers')
+      .select('quantity, id')
+      .eq('id', order.offer_id)
+      .single();
+      
+    if (offerError) throw offerError;
+    
+    // Calcular cantidad restante
+    const remainingQuantity = offer.quantity - order.quantity;
+    
+    if (remainingQuantity < 0) {
+      throw new Error('No hay suficientes tokens disponibles para esta compra');
+    }
+    
+    // Crear la orden
+    const { data, error } = await supabase
+      .from('orders')
+      .insert(order)
+      .select(`
+        *,
+        offer:offer_id(
+          *,
+          token:token_id(*),
+          seller:seller_id(*)
+        )
+      `)
+      .single();
+    
+    if (error) throw error;
+    
+    // Actualizar la cantidad de la oferta
+    try {
+      await updateOfferQuantity(order.offer_id, remainingQuantity);
+    } catch (updateError) {
+      console.error('Error al actualizar la cantidad de la oferta:', updateError);
+      // Idealmente, deberíamos revertir la creación de la orden en una transacción real
+      // Como Supabase no soporta transacciones verdaderas en el cliente, solo registramos el error
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error al crear la orden:', error);
+    throw error;
+  }
+};
+
 export const updateOrderStatus = async (orderId: string, status: Order['status'], transactionId?: string): Promise<Order> => {
-  const updateData: unknown = {
+  const updateData: Record<string, unknown> = {
     status,
     updated_at: new Date().toISOString()
   };

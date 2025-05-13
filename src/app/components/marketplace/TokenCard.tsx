@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { formatCurrency } from '@/app/lib/formatters';
 import { Token, Offer } from '@/app/lib/supabase';
@@ -12,6 +12,7 @@ interface TokenCardProps {
   onSell?: (token: Token) => void;
   isOwner?: boolean;
   view?: 'marketplace' | 'account';
+  onOfferUpdate?: (offerId: string, newQuantity: number) => void; // Callback para actualizar ofertas
 }
 
 export default function TokenCard({ 
@@ -20,14 +21,57 @@ export default function TokenCard({
   onBuy, 
   onSell, 
   isOwner = false,
-  view = 'marketplace'
+  view = 'marketplace',
+  onOfferUpdate
 }: TokenCardProps) {
   const [showOffers, setShowOffers] = useState(false);
+  const [localOffers, setLocalOffers] = useState<Offer[]>(offers);
   
-  const totalOffersQuantity = offers.reduce((sum, offer) => sum + offer.quantity, 0);
-  const lowestPrice = offers.length > 0 
-    ? Math.min(...offers.map(offer => offer.price_per_token))
+  // Actualizar ofertas locales cuando cambian las props
+  useEffect(() => {
+    setLocalOffers(offers);
+  }, [offers]);
+  
+  const totalOffersQuantity = localOffers.reduce((sum, offer) => sum + offer.quantity, 0);
+  const lowestPrice = localOffers.length > 0 
+    ? Math.min(...localOffers.map(offer => offer.price_per_token))
     : null;
+  
+  // Función para manejar la compra y actualizar las cantidades localmente
+  const handleBuy = (offer: Offer) => {
+    if (onBuy) {
+      onBuy(offer);
+    }
+  };
+  
+  // Función para actualizar localmente la cantidad de una oferta después de una compra parcial
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const updateOfferQuantity = (offerId: string, purchasedQuantity: number) => {
+    setLocalOffers(prevOffers => 
+      prevOffers.map(offer => {
+        if (offer.id === offerId) {
+          const newQuantity = Math.max(0, offer.quantity - purchasedQuantity);
+          
+          // Si hay un callback externo, notificar el cambio
+          if (onOfferUpdate) {
+            onOfferUpdate(offerId, newQuantity);
+          }
+          
+          // Si la cantidad llega a 0, no incluimos la oferta
+          if (newQuantity === 0) {
+            return null;
+          }
+          
+          // De lo contrario, actualizamos la cantidad
+          return {
+            ...offer,
+            quantity: newQuantity
+          };
+        }
+        return offer;
+      }).filter(Boolean) as Offer[] // Filtrar ofertas con cantidad 0
+    );
+  };
   
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-xl transition-all hover:shadow-2xl">
@@ -57,7 +101,7 @@ export default function TokenCard({
         </div>
         
         {/* Información de ofertas */}
-        {offers.length > 0 ? (
+        {localOffers.length > 0 ? (
           <div className="mb-3">
             <div className="flex justify-between text-sm text-gray-300">
               <span>Disponibles:</span>
@@ -90,42 +134,42 @@ export default function TokenCard({
             <button
               onClick={() => setShowOffers(!showOffers)}
               className={`text-white rounded-full py-2 font-medium transition-all ${
-                offers.length === 0 ? 'bg-gray-600 cursor-not-allowed' : ''
+                localOffers.length === 0 ? 'bg-gray-600 cursor-not-allowed' : ''
               }`}
               style={
-                offers.length > 0 
+                localOffers.length > 0 
                   ? { background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)' }
                   : {}
               }
-              disabled={offers.length === 0}
+              disabled={localOffers.length === 0}
             >
-              {offers.length === 0 ? 'Sin disponibilidad' : (showOffers ? 'Ocultar ofertas' : 'Ver ofertas')}
+              {localOffers.length === 0 ? 'Sin disponibilidad' : (showOffers ? 'Ocultar ofertas' : 'Ver ofertas')}
             </button>
           )}
         </div>
       </div>
       
       {/* Listado de ofertas (desplegable) */}
-      {showOffers && offers.length > 0 && (
+      {showOffers && localOffers.length > 0 && (
         <div className="p-4 bg-gray-900">
           <h4 className="text-sm font-semibold text-gray-300 mb-2">Ofertas disponibles:</h4>
           <ul className="space-y-2">
-            {offers.map((offer) => (
+            {localOffers.map((offer) => (
               <li key={offer.id} className="flex justify-between items-center p-2 bg-gray-800 rounded">
                 <div>
                   <div className="text-sm text-white">{offer.quantity} tokens</div>
                   <div className="text-xs text-gray-400">
-  Vendedor: {offer.seller?.wallet_address 
-    ? `${offer.seller.wallet_address.slice(0, 6)}....${offer.seller.wallet_address.slice(-4)}` 
-    : offer.seller_id.slice(0, 8)}
-</div>
+                    Vendedor: {offer.seller?.wallet_address 
+                      ? `${offer.seller.wallet_address.slice(0, 6)}....${offer.seller.wallet_address.slice(-4)}` 
+                      : offer.seller_id.slice(0, 8)}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-sm font-bold" style={{ color: '#8CCA6E' }}>
                     {formatCurrency(offer.price_per_token)}
                   </div>
                   <button 
-                    onClick={() => onBuy && onBuy(offer)} 
+                    onClick={() => handleBuy(offer)} 
                     className="text-white text-xs px-3 py-1 rounded-full"
                     style={{ background: 'linear-gradient(90deg, #3A8D8C 0%, #8CCA6E 100%)' }}
                   >

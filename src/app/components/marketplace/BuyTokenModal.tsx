@@ -18,9 +18,10 @@ interface BuyTokenModalProps {
   offer: Offer;
   buyerExternalId: string;
   buyerWalletId: string;
-  buyerWalletAddress: string; // Añadido la propiedad wallet address
-  onSubmit: (offerId: string, quantity: number) => Promise<string>; // Ahora devuelve transactionId
+  buyerWalletAddress: string;
+  onSubmit: (offerId: string, quantity: number) => Promise<string>; // Devuelve transactionId
   onClose: () => void;
+  onSuccess?: (offerId: string, quantityPurchased: number) => void; // Callback para cuando la compra es exitosa
   isOpen: boolean;
 }
 
@@ -31,9 +32,10 @@ export default function BuyTokenModal({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buyerWalletId,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  buyerWalletAddress, // Nueva propiedad
+  buyerWalletAddress,
   onSubmit, 
-  onClose, 
+  onClose,
+  onSuccess,
   isOpen 
 }: BuyTokenModalProps) {
   const [quantity, setQuantity] = useState(1);
@@ -65,6 +67,11 @@ export default function BuyTokenModal({
       // Ahora el onSubmit nos devuelve el transactionId
       const transactionId = await onSubmit(offer.id, quantity);
       
+      // Notificar éxito si el callback existe
+      if (onSuccess) {
+        onSuccess(offer.id, quantity);
+      }
+      
       // Obtener la URL de PSE con el transactionId
       try {
         const { pseURL } = await getPseUrl(transactionId);
@@ -83,8 +90,6 @@ export default function BuyTokenModal({
   };
   
   const tokenName = offer.token?.name || 'Token';
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const sellerName = offer.seller?.external_id || 'Vendedor desconocido';
   
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
