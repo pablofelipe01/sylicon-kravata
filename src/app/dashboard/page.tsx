@@ -40,12 +40,19 @@ export default function DashboardPage() {
   
   const [tokens, setTokens] = useState<Token[]>([]);
   const [myOffers, setMyOffers] = useState<Offer[]>([]);
+  const [filteredOffers, setFilteredOffers] = useState<Offer[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // Estados para modales
   const [sellModalOpen, setSellModalOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  
+  // Estados para filtros de ofertas
+  const [tokenFilter, setTokenFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priceSort, setPriceSort] = useState<'none' | 'asc' | 'desc'>('none');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   
   // Redireccionar si no está logueado
   useEffect(() => {
@@ -95,6 +102,7 @@ export default function DashboardPage() {
       if (seller && seller.id) {
         const offersData = await getOffersBySeller(seller.id);
         setMyOffers(offersData);
+        setFilteredOffers(offersData);
       }
       
       // Actualizar balance
@@ -103,6 +111,59 @@ export default function DashboardPage() {
       console.error("Error loading user data:", err);
       setError("Error al cargar los datos del usuario");
     }
+  };
+  
+  // Efecto para filtrar ofertas cuando cambian los criterios
+  useEffect(() => {
+    if (!myOffers.length) return;
+    
+    let filtered = [...myOffers];
+    
+    // Filtrar por token
+    if (tokenFilter !== 'all') {
+      filtered = filtered.filter(offer => 
+        offer.token?.id === tokenFilter
+      );
+    }
+    
+    // Filtrar por estado
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(offer => 
+        offer.status === statusFilter
+      );
+    }
+    
+    // Filtrar por búsqueda
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(offer => 
+        offer.token?.name?.toLowerCase().includes(query) ||
+        offer.token?.description?.toLowerCase().includes(query) ||
+        offer.token?.token_address.toLowerCase().includes(query)
+      );
+    }
+    
+    // Ordenar por precio
+    if (priceSort !== 'none') {
+      filtered.sort((a, b) => {
+        if (priceSort === 'asc') {
+          return a.price_per_token - b.price_per_token;
+        } else {
+          return b.price_per_token - a.price_per_token;
+        }
+      });
+    }
+    
+    setFilteredOffers(filtered);
+  }, [myOffers, tokenFilter, statusFilter, priceSort, searchQuery]);
+  
+  // Función para limpiar filtros
+  const clearFilters = () => {
+    setTokenFilter('all');
+    setStatusFilter('all');
+    setPriceSort('none');
+    setSearchQuery('');
+    setFilteredOffers(myOffers);
   };
   
   // Manejar la venta de tokens
@@ -304,11 +365,111 @@ export default function DashboardPage() {
         
         {/* Mis Ofertas */}
         <section>
-          <h2 className="text-xl font-bold text-white mb-4">Mis Ofertas en el Mercado</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-white">Mis Ofertas en el Mercado</h2>
+            
+            {/* Contador de resultados */}
+            <div className="text-sm text-gray-400">
+              {filteredOffers.length} de {myOffers.length} ofertas
+            </div>
+          </div>
+          
+          {/* Panel de filtros */}
+          {myOffers.length > 0 && (
+            <div className="p-4 bg-gray-800 rounded-lg mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Filtro por token */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Token
+                  </label>
+                  <select
+                    value={tokenFilter}
+                    onChange={(e) => setTokenFilter(e.target.value)}
+                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  >
+                    <option value="all">Todos los tokens</option>
+                    {Array.from(new Set(myOffers.map(offer => offer.token?.id)))
+                      .filter(Boolean)
+                      .map(tokenId => {
+                        const token = myOffers.find(o => o.token?.id === tokenId)?.token;
+                        return (
+                          <option key={tokenId} value={tokenId}>
+                            {token?.name || 'Token sin nombre'}
+                          </option>
+                        );
+                      })
+                    }
+                  </select>
+                </div>
+                
+                {/* Filtro por estado */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Estado
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  >
+                    <option value="all">Todos</option>
+                    <option value="active">Activas</option>
+                    <option value="sold">Vendidas</option>
+                    <option value="cancelled">Canceladas</option>
+                  </select>
+                </div>
+                
+                {/* Ordenar por precio */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Ordenar por precio
+                  </label>
+                  <select
+                    value={priceSort}
+                    onChange={(e) => setPriceSort(e.target.value as 'none' | 'asc' | 'desc')}
+                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  >
+                    <option value="none">Sin ordenar</option>
+                    <option value="asc">Menor a mayor</option>
+                    <option value="desc">Mayor a menor</option>
+                  </select>
+                </div>
+                
+                {/* Búsqueda */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Buscar
+                  </label>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Nombre o dirección del token..."
+                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  />
+                </div>
+              </div>
+              
+              {/* Botón para limpiar filtros */}
+              <div className="mt-3 flex justify-end">
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
+          )}
           
           {myOffers.length === 0 ? (
             <Card className="p-8 text-center bg-gray-800 text-gray-400">
               <p>No tienes ofertas activas en el marketplace.</p>
+            </Card>
+          ) : filteredOffers.length === 0 ? (
+            <Card className="p-8 text-center bg-gray-800 text-gray-400">
+              <p>No se encontraron ofertas con los filtros aplicados.</p>
             </Card>
           ) : (
             <div className="overflow-x-auto">
@@ -324,7 +485,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
-                  {myOffers.map(offer => (
+                  {filteredOffers.map(offer => (
                     <tr key={offer.id} className="bg-gray-900">
                       <td className="px-6 py-4">
                         <div className="flex items-center">
