@@ -67,10 +67,33 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
     const tokenMap: {[key: string]: string} = {
       'SYL': 'Sylicon',
       'ISII': 'Inmobiliario Sylicon II',
-      'ISIIl': 'Inmobiliario Sylicon III'
+      'ISIIl': 'Inmobiliario Sylicon III',
+      'TKM': 'TokenMarket'
     };
     
     return tokenMap[tokenSymbol] || tokenSymbol;
+  };
+
+  // Función para obtener el estilo del estado
+  const getStatusStyle = (status: string) => {
+    const statusMap: {[key: string]: string} = {
+      'PENDING': 'bg-yellow-900/40 text-yellow-300',
+      'COMPLETED': 'bg-green-900/40 text-green-300',
+      'CANCELLED': 'bg-red-900/40 text-red-300'
+    };
+    
+    return statusMap[status] || 'bg-gray-700 text-gray-300';
+  };
+
+  // Función para obtener el texto del estado en español
+  const getStatusText = (status: string) => {
+    const statusMap: {[key: string]: string} = {
+      'PENDING': 'Pendiente',
+      'COMPLETED': 'Completada',
+      'CANCELLED': 'Cancelada'
+    };
+    
+    return statusMap[status] || status;
   };
 
   if (loading) {
@@ -119,6 +142,7 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Cantidad</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Precio</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
@@ -149,6 +173,12 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
               // Obtener nombre más descriptivo del token
               const tokenName = getTokenName(transaction.token || "");
               
+              // Obtener estilo para el estado
+              const statusStyle = getStatusStyle(transaction.status || "");
+              
+              // Obtener texto del estado
+              const statusText = getStatusText(transaction.status || "");
+              
               return (
                 <tr key={transaction.transactionId} className="hover:bg-gray-750">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -170,6 +200,13 @@ export default function UserTransactionHistory({ externalId }: UserTransactionHi
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {formatCurrency(total)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {transaction.status && (
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyle}`}>
+                        {statusText}
+                      </span>
+                    )}
                   </td>
                 </tr>
               );
