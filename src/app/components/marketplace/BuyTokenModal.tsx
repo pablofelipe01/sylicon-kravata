@@ -5,10 +5,20 @@ import { Offer } from '@/app/lib/supabase';
 import { formatCurrency } from '@/app/lib/formatters';
 import { getPseUrl } from '@/app/lib/api';
 
+// Función para acortar la dirección del wallet
+const formatWalletAddress = (address: string | undefined): string => {
+  if (!address) return 'Desconocida';
+  // Si la dirección es más corta que 10 caracteres, la devolvemos completa
+  if (address.length < 10) return address;
+  // De lo contrario, mostramos los primeros 4 y los últimos 4 caracteres
+  return `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
+};
+
 interface BuyTokenModalProps {
   offer: Offer;
   buyerExternalId: string;
   buyerWalletId: string;
+  buyerWalletAddress: string; // Añadido la propiedad wallet address
   onSubmit: (offerId: string, quantity: number) => Promise<string>; // Ahora devuelve transactionId
   onClose: () => void;
   isOpen: boolean;
@@ -16,8 +26,12 @@ interface BuyTokenModalProps {
 
 export default function BuyTokenModal({ 
   offer, 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buyerExternalId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buyerWalletId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  buyerWalletAddress, // Nueva propiedad
   onSubmit, 
   onClose, 
   isOpen 
@@ -55,6 +69,7 @@ export default function BuyTokenModal({
       try {
         const { pseURL } = await getPseUrl(transactionId);
         window.location.href = pseURL;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError("No se pudo obtener la URL de pago PSE. Es posible que la sesión haya expirado. Por favor, intente crear una nueva orden.");
         setLoading(false);
@@ -68,6 +83,7 @@ export default function BuyTokenModal({
   };
   
   const tokenName = offer.token?.name || 'Token';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const sellerName = offer.seller?.external_id || 'Vendedor desconocido';
   
   return (
@@ -94,7 +110,7 @@ export default function BuyTokenModal({
                 <div className="bg-gray-700 p-3 rounded-md mb-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-300">Vendedor:</span>
-                    <span className="text-white">{sellerName}</span>
+                    <span className="text-white">{formatWalletAddress(offer.seller?.wallet_address)}</span>
                   </div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-300">Disponibles:</span>
@@ -135,9 +151,7 @@ export default function BuyTokenModal({
                     <p className="text-xs text-gray-400 mb-2">
                       El pago será procesado a través de PSE una vez que confirmes la compra.
                     </p>
-                    <p className="text-xs text-gray-400">
-                      Tu ID: {buyerExternalId}
-                    </p>
+                    
                   </div>
                   
                   {error && (
