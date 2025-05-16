@@ -98,7 +98,7 @@ export default function KycRegistrationPage() {
             <li>• Letras mayúsculas (A-Z)</li>
             <li>• Letras minúsculas (a-z)</li>
             <li>• Números (0-9)</li>
-            <li>• Símbolos especiales (solo se permiten: @, !, $, %, &, *)</li>
+            <li>• Símbolos especiales. (solo se permiten: @, !, $, %, &, *)</li>
           </ul>
         </span>
       </li>

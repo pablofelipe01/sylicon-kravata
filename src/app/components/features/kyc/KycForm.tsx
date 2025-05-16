@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Input } from '../../ui';
 import { getKycForm } from '../../../lib/api';
+import Link from 'next/link';
 
 interface KycFormProps {
   onSuccess: (data: unknown) => void;
@@ -13,6 +14,7 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
   const [externalId, setExternalId] = useState("");
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   // Estado para cada regla de validación
   const [validations, setValidations] = useState({
@@ -65,6 +67,12 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
     // Verificar validación antes de enviar
     if (!isValid) {
       onError("Por favor, asegúrate de cumplir todos los requisitos");
+      return;
+    }
+    
+    // Verificar aceptación de términos
+    if (!termsAccepted) {
+      onError("Debes aceptar los términos del contrato para continuar");
       return;
     }
     
@@ -205,9 +213,37 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
         </div>
       )}
       
+      {/* Checkbox para aceptar términos y condiciones */}
+      <div className="mt-4 p-4 bg-gray-800 rounded-lg">
+        <div className="flex items-start">
+          <input 
+            type="checkbox" 
+            id="terms-checkbox" 
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="mt-1 mr-3"
+          />
+          <label htmlFor="terms-checkbox" className="text-gray-300 text-sm">
+            Entiendo y acepto las condiciones establecidas en el <Link href="/contrato" className="text-blue-400 hover:underline" target="_blank">contrato de compra de tokens inmobiliarios</Link> y confirmo que he leído todos los términos antes de continuar con el proceso de verificación KYC.
+          </label>
+        </div>
+      </div>
+      
+      {/* Mensaje de advertencia cuando no se han aceptado los términos */}
+      {!termsAccepted && externalId.length > 0 && isValid && (
+        <div className="mt-3 p-2 rounded-md bg-yellow-500/10 border border-yellow-500/20">
+          <p className="text-yellow-400 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            Debes aceptar los términos del contrato para continuar
+          </p>
+        </div>
+      )}
+      
       <button 
         type="submit"
-        disabled={loading || !isValid}
+        disabled={loading || !isValid || !termsAccepted}
         className="w-full mt-4 px-4 py-2 text-white font-medium rounded-md transition-all shadow-md hover:shadow-lg bg-gradient-to-r from-[#3A8D8C] to-[#8CCA6E] hover:from-[#4DA7A2] hover:to-[#71BB87] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? (

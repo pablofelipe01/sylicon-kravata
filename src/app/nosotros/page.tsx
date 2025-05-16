@@ -61,18 +61,24 @@ export default function NosotrosPage() {
         <section className="mb-10 bg-gray-800 rounded-lg p-6 shadow-lg">
           <div className="flex flex-col md:flex-row gap-6 items-center">
             <div className="w-full md:w-1/4 flex justify-center">
-              <div className="h-32 w-64 relative bg-gray-700 rounded-lg flex items-center justify-center">
-                <p className="text-gray-400 text-center p-4">Logo pendiente</p>
+            <div className="h-32 w-64 relative">
+                <Image
+                  src="/CU.png"
+                  alt="Pentaco Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
               </div>
+              {/* <div className="h-32 w-64 relative bg-gray-700 rounded-lg flex items-center justify-center">
+                <p className="text-gray-400 text-center p-4">Logo pendiente</p>
+              </div> */}
             </div>
             <div className="w-full md:w-3/4">
               <h3 className="text-xl font-bold text-white mb-3">Custor</h3>
               <p className="text-gray-300">
                 Custor es una entidad enfocada en realizar inversiones innovadoras de alto crecimiento en Colombia y Latinoamérica. El gerente de Custor, Juan Pablo Romero, cuenta con más de 25 años de experiencia en los sectores de tecnología, aviación, inmobiliaria y de infraestructura.
               </p>
-              <p className="text-gray-400 text-sm mt-2 italic">
-                (Para Custor nos hace falta el logo. Juan Pablo, ¿nos podrías enviar un logo si tienes?)
-              </p>
+             
             </div>
           </div>
         </section>
