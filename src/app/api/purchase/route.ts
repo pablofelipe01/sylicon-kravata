@@ -1,4 +1,3 @@
-// /app/api/purchase/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder, getOfferById, updateOfferQuantity } from "@/app/lib/supabase";
 import { getPseUrl } from "@/app/lib/api";
@@ -40,15 +39,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Crear la orden
-    const totalPrice = quantity * offer.price_per_token;
+    // 2. Calcular el precio total incluyendo comisiones y tarifas
+    const basePrice = quantity * offer.price_per_token;
+    const syliconCommission = basePrice * 0.01; // 1% de comisión
+    const fixedFee = 900; // Tarifa fija de $900 pesos
+    const totalPrice = basePrice + syliconCommission + fixedFee;
     
+    // Crear la orden con el precio total actualizado
     const order = await createOrder({
       buyer_external_id: buyerExternalId,
       buyer_wallet_id: buyerWalletId,
       offer_id: offerId,
       quantity: quantity,
-      total_price: totalPrice,
+      total_price: totalPrice, // Ahora incluye comisión + tarifa fija
       status: 'pending'
     });
 
