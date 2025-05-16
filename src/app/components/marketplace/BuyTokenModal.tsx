@@ -45,7 +45,12 @@ export default function BuyTokenModal({
   if (!isOpen || !offer) return null;
   
   const maxQuantity = offer.quantity;
-  const totalPrice = quantity * offer.price_per_token;
+  
+  // Cálculo del precio total incluyendo comisiones
+  const basePrice = quantity * offer.price_per_token;
+  const syliconCommission = basePrice * 0.01; // 1% de comisión
+  const fixedFee = 900; // Tarifa fija de $900 pesos
+  const totalPrice = basePrice + syliconCommission + fixedFee;
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,12 +147,37 @@ export default function BuyTokenModal({
                     />
                   </div>
                   
-                  <div className="bg-gray-700 p-3 rounded-md mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-300">Total a pagar:</span>
-                      <span className="text-green-400 font-bold">
-                        {formatCurrency(totalPrice)}
-                      </span>
+                  <div className="bg-gray-700 p-4 rounded-md mb-4">
+                    <h4 className="text-sm font-medium text-white mb-3">Resumen de la compra:</h4>
+                    
+                    <div className="space-y-2 mb-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-300">Valor de los tokens:</span>
+                        <span className="text-white">{formatCurrency(basePrice)}</span>
+                      </div>
+                      
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-300">Comisión Sylicon (1%):</span>
+                        <span className="text-white">{formatCurrency(syliconCommission)}</span>
+                      </div>
+                      
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-300">Tarifa de procesamiento:</span>
+                        <span className="text-white">{formatCurrency(fixedFee)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-gray-600 pt-3 mt-3">
+                      <div className="flex justify-between text-sm font-bold">
+                        <span className="text-gray-300">Total a pagar:</span>
+                        <span className="text-green-400">
+                          {formatCurrency(totalPrice)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 text-xs text-gray-400">
+                      Sylicon cobra una comisión del 1% sobre el valor de la transacción más una tarifa fija de $900 por procesamiento de pago.
                     </div>
                   </div>
                   
