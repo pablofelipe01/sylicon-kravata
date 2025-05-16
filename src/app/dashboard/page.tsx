@@ -21,6 +21,8 @@ import { formatCurrency } from "../lib/formatters";
 import { useRouter } from "next/navigation";
 import UserTransactionHistory from "../components/features/transactions/UserTransactionHistory";
 import UserTokensSection from "../components/features/tokens/UserTokensSection";
+import PortfolioComposition from "../components/features/portfolio/PortfolioComposition";
+import PortfolioPerformance from "../components/features/portfolio/PortfolioPerformance";
 import { TokenBalance } from "../types";
 
 // Función para enmascarar el ID, mostrando solo los primeros 2 y últimos 1 caracteres
@@ -321,6 +323,39 @@ export default function DashboardPage() {
             {error}
           </div>
         )}
+        
+        {/* Composición del Portafolio */}
+        <section className="mb-10">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-white">Composición del Portafolio</h2>
+          </div>
+          
+          {user.tokens.length === 0 ? (
+            <Card className="p-8 text-center bg-gray-800 text-gray-400">
+              <p>No posees tokens en tu billetera para analizar la composición.</p>
+            </Card>
+          ) : (
+            <PortfolioComposition tokens={user.tokens} />
+          )}
+        </section>
+        
+        {/* NUEVA SECCIÓN: Rentabilidad y Rendimiento */}
+        <section className="mb-10">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-white">Rentabilidad y Rendimiento</h2>
+            <div className="bg-gradient-to-r from-blue-500/20 to-green-500/20 px-3 py-1 rounded-full">
+              <span className="text-sm text-blue-300">Datos Simulados</span>
+            </div>
+          </div>
+          
+          {user.tokens.length === 0 ? (
+            <Card className="p-8 text-center bg-gray-800 text-gray-400">
+              <p>No posees tokens en tu billetera para analizar el rendimiento.</p>
+            </Card>
+          ) : (
+            <PortfolioPerformance />
+          )}
+        </section>
         
         {/* Mis Tokens */}
         <section className="mb-10">
