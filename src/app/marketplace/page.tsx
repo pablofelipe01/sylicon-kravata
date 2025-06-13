@@ -101,8 +101,8 @@ export default function MarketplacePage() {
     setBuyModalOpen(true);
   };
   
-  // Procesar la compra - VERSIÓN ACTUALIZADA CON MAPEO DE TOKENS
-  const handleProcessPurchase = async (offerId: string, quantity: number): Promise<string> => {
+  // Procesar la compra - ACTUALIZADA PARA INCLUIR bankName
+  const handleProcessPurchase = async (offerId: string, quantity: number, bankName: string): Promise<string> => {
     if (!selectedOffer || !user.externalId || !user.walletId) {
       throw new Error("Debes iniciar sesión para comprar tokens");
     }
@@ -119,6 +119,7 @@ export default function MarketplacePage() {
       }
       
       console.log("Procesando compra para oferta:", selectedOffer);
+      console.log("Banco seleccionado:", bankName);
       
       // Obtener el símbolo correcto del token basado en su dirección
       const tokenSymbol = getTokenSymbol(
@@ -143,7 +144,9 @@ export default function MarketplacePage() {
             tokensSold: quantity,
             pricePerToken: selectedOffer.price_per_token
           }
-        ]
+        ],
+        // Si tu API de Kravata necesita el banco aquí, puedes agregarlo
+        // bank: bankName
       };
       
       console.log("Datos de orden validados. Preparando solicitud:", orderData);
@@ -282,6 +285,7 @@ export default function MarketplacePage() {
             offer={selectedOffer}
             buyerExternalId={user.externalId}
             buyerWalletId={user.walletId}
+            buyerWalletAddress={user.walletAddress || ''} // Agregamos el wallet address
             onSubmit={handleProcessPurchase}
           />
         )}

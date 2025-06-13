@@ -4,13 +4,12 @@ import React, { useState } from 'react';
 import { Offer } from '@/app/lib/supabase';
 import { formatCurrency } from '@/app/lib/formatters';
 import { getPseUrl } from '@/app/lib/api';
+import { colombianBanks } from '@/app/lib/banks';
 
 // Función para acortar la dirección del wallet
 const formatWalletAddress = (address: string | undefined): string => {
   if (!address) return 'Desconocida';
-  // Si la dirección es más corta que 10 caracteres, la devolvemos completa
   if (address.length < 10) return address;
-  // De lo contrario, mostramos los primeros 4 y los últimos 4 caracteres
   return `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
 };
 
@@ -19,19 +18,16 @@ interface BuyTokenModalProps {
   buyerExternalId: string;
   buyerWalletId: string;
   buyerWalletAddress: string;
-  onSubmit: (offerId: string, quantity: number) => Promise<string>; // Devuelve transactionId
+  onSubmit: (offerId: string, quantity: number, bankCode: string) => Promise<string>; // bankCode por compatibilidad
   onClose: () => void;
-  onSuccess?: (offerId: string, quantityPurchased: number) => void; // Callback para cuando la compra es exitosa
+  onSuccess?: (offerId: string, quantityPurchased: number) => void;
   isOpen: boolean;
 }
 
 export default function BuyTokenModal({ 
   offer, 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buyerExternalId,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buyerWalletId,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buyerWalletAddress,
   onSubmit, 
   onClose,
@@ -39,6 +35,7 @@ export default function BuyTokenModal({
   isOpen 
 }: BuyTokenModalProps) {
   const [quantity, setQuantity] = useState(1);
+  const [selectedBank, setSelectedBank] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -64,30 +61,40 @@ export default function BuyTokenModal({
       setError(`No puedes comprar más de ${maxQuantity} tokens`);
       return;
     }
+
+    if (!selectedBank) {
+      setError('Por favor selecciona un banco');
+      return;
+    }
     
     setLoading(true);
     setError(null);
     
     try {
-      // Ahora el onSubmit nos devuelve el transactionId
-      const transactionId = await onSubmit(offer.id, quantity);
+      // Encontrar el banco seleccionado
+      const bank = colombianBanks.find(b => b.code === selectedBank);
+      if (!bank) {
+        throw new Error('Banco no válido');
+      }
       
-      // Notificar éxito si el callback existe
+      console.log(`Procesando compra con banco: ${bank.name} (código: ${selectedBank})`);
+
+      // Pasar el código del banco a onSubmit (aunque puede que no lo use)
+      const transactionId = await onSubmit(offer.id, quantity, selectedBank);
+      
       if (onSuccess) {
         onSuccess(offer.id, quantity);
       }
       
-      // Obtener la URL de PSE con el transactionId
       try {
-        const { pseURL } = await getPseUrl(transactionId);
+        // Pasar AMBOS: código y nombre del banco a getPseUrl
+        const { pseURL } = await getPseUrl(transactionId, selectedBank, bank.name);
         window.location.href = pseURL;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError("No se pudo obtener la URL de pago PSE. Es posible que la sesión haya expirado. Por favor, intente crear una nueva orden.");
         setLoading(false);
       }
       
-      // No cerramos el modal aquí, ya que estamos redirigiendo o mostrando un error
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al procesar la compra');
       setLoading(false);
@@ -146,6 +153,26 @@ export default function BuyTokenModal({
                       className="w-full p-2 border border-gray-600 rounded-md bg-gray-700 text-white"
                     />
                   </div>
+
+                  {/* Dropdown de bancos */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1 text-gray-300">
+                      Selecciona tu banco:
+                    </label>
+                    <select
+                      value={selectedBank}
+                      onChange={(e) => setSelectedBank(e.target.value)}
+                      className="w-full p-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                      required
+                    >
+                      <option value="">-- Selecciona un banco --</option>
+                      {colombianBanks.map((bank) => (
+                        <option key={bank.code} value={bank.code}>
+                          {bank.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   
                   <div className="bg-gray-700 p-4 rounded-md mb-4">
                     <h4 className="text-sm font-medium text-white mb-3">Resumen de la compra:</h4>
@@ -184,9 +211,8 @@ export default function BuyTokenModal({
                   <div className="bg-gray-700 p-3 rounded-md mb-4">
                     <h4 className="text-sm font-medium text-gray-300 mb-2">Detalles de pago:</h4>
                     <p className="text-xs text-gray-400 mb-2">
-                      El pago será procesado a través de PSE una vez que confirmes la compra.
+                      El pago será procesado a través de PSE desde el banco que seleccionaste.
                     </p>
-                    
                   </div>
                   
                   {error && (
@@ -206,7 +232,7 @@ export default function BuyTokenModal({
                     <button
                       type="submit"
                       className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={loading}
+                      disabled={loading || !selectedBank}
                     >
                       {loading ? 'Procesando...' : 'Confirmar compra'}
                     </button>

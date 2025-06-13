@@ -171,17 +171,28 @@ export async function createOrder(orderData: CreateOrderRequest): Promise<Create
 /**
  * Obtiene la URL de pago PSE para una transacción específica
  * @param transactionId ID de la transacción para la cual obtener la URL de PSE
+ * @param bankCode Código del banco seleccionado por el usuario
+ * @param bankName Nombre del banco seleccionado por el usuario
  * @returns Objeto con la URL de PSE
  */
-export async function getPseUrl(transactionId: string): Promise<PseUrlResponse> {
+export async function getPseUrl(transactionId: string, bankCode?: string, bankName?: string): Promise<PseUrlResponse> {
   console.log('Solicitando URL de PSE para transacción:', transactionId);
+  if (bankCode && bankName) {
+    console.log(`Banco: ${bankName} (Código: ${bankCode})`);
+  }
   
   // Validación del parámetro
   if (!transactionId || transactionId.trim() === '') {
     throw new Error('transactionId is required');
   }
   
-  return fetchAPI<PseUrlResponse>(`/api/kravata/order/pse?transactionId=${encodeURIComponent(transactionId.trim())}`, {
+  // Construir la URL con el banco si está presente
+  let url = `/api/kravata/order/pse?transactionId=${encodeURIComponent(transactionId.trim())}`;
+  if (bankCode && bankName) {
+    url += `&bankName=${encodeURIComponent(bankName)}&bankCode=${encodeURIComponent(bankCode)}`;
+  }
+  
+  return fetchAPI<PseUrlResponse>(url, {
     method: 'GET',
   });
 }
