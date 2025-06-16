@@ -5,13 +5,21 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { externalId } = body;
+    const { externalId, kycType } = body;
 
     if (!externalId) {
       return NextResponse.json({ error: "externalId is required" }, { status: 400 });
     }
 
-    console.log(`Solicitando formulario KYC para externalId: ${externalId}`);
+    console.log(`Solicitando formulario KYC para externalId: ${externalId}, tipo: ${kycType || 'inicial'}`);
+
+    // Construir el body para la API de Kravata
+    const kravataRequestBody: unknown = { externalId };
+    
+    // Solo añadir kycType si está presente
+    if (kycType) {
+      kravataRequestBody.kycType = kycType;
+    }
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/compliance/onboarding/formkyc`,
@@ -21,13 +29,15 @@ export async function POST(request: NextRequest) {
           "Content-Type": "application/json",
           "x-api-key": process.env.KRAVATA_API_KEY || "",
         },
-        body: JSON.stringify({ externalId }),
+        body: JSON.stringify(kravataRequestBody),
       }
     );
 
     console.log(`Respuesta de Kravata FormKYC API: ${response.status}`);
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Error de Kravata API:`, errorText);
       return NextResponse.json(
         { error: `API request failed with status ${response.status}` },
         { status: response.status }
@@ -71,6 +81,8 @@ export async function GET(request: NextRequest) {
     console.log(`Respuesta de Kravata Status API: ${response.status}`);
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Error de Kravata API:`, errorText);
       return NextResponse.json(
         { error: `API request failed with status ${response.status}` },
         { status: response.status }
@@ -83,13 +95,11 @@ export async function GET(request: NextRequest) {
     // Mapear campos para mantener consistencia con lo que espera el frontend
     const mappedData = {
       ...data,
-      status: data.complianceStatus // Añadir campo status basado en complianceStatus
+      status: data.complianceStatus === 'approved' ? 'completed' : 
+              data.complianceStatus === 'in_review' ? 'pending' : 
+              data.complianceStatus === 'rejected' ? 'rejected' : 
+              data.complianceStatus
     };
-    
-    // Mapeo adicional para tipos de estado específicos si es necesario
-    if (mappedData.status === "approved") {
-      mappedData.status = "completed";
-    }
     
     return NextResponse.json(mappedData);
   } catch (error) {

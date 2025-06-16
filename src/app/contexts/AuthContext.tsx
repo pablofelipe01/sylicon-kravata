@@ -14,6 +14,8 @@ interface AuthContextType {
     balance: number;  // Mantenemos balance como número para compatibilidad
     tokens: TokenBalance[];  // Añadimos array de tokens
     kycStatus: string | null;
+    firstName?: string;  // Nombre del usuario
+    surname?: string;    // Apellido del usuario
   };
   isLoading: boolean; // Estado de carga para operaciones asíncronas
   login: (externalId: string) => Promise<void>;
@@ -50,6 +52,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     balance: 0,
     tokens: [] as TokenBalance[],
     kycStatus: null as string | null,
+    firstName: undefined as string | undefined,
+    surname: undefined as string | undefined,
   });
   
   // Estado de carga
@@ -92,7 +96,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         walletAddress: walletData.walletAddress,
         balance: balance,
         tokens: tokens,
-        kycStatus: null
+        kycStatus: null,
+        firstName: undefined,
+        surname: undefined
       };
       
       setUser({
@@ -103,8 +109,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Guardar en localStorage
       localStorage.setItem('auth', JSON.stringify(userData));
       
-      // Verificar estado KYC
-      await checkUserKycStatus();
+      // Verificar estado KYC (que también obtendrá el nombre si está disponible)
+      await checkUserKycStatus(walletData.externalId);
     } catch (err) {
       console.error('Error during login:', err);
       throw err;
@@ -122,7 +128,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       walletAddress: '',
       balance: 0,
       tokens: [],
-      kycStatus: null
+      kycStatus: null,
+      firstName: undefined,
+      surname: undefined
     });
     localStorage.removeItem('auth');
   };
@@ -157,7 +165,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         walletAddress: walletData.walletAddress,
         balance,
         tokens,
-        kycStatus: user.kycStatus
+        kycStatus: user.kycStatus,
+        firstName: user.firstName,
+        surname: user.surname
       }));
     } catch (err) {
       console.error('Error refreshing balance:', err);
@@ -168,29 +178,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Función para verificar estado KYC
-  const checkUserKycStatus = async (): Promise<string> => {
-    if (!user.externalId) return 'unknown';
+  const checkUserKycStatus = async (externalIdParam?: string): Promise<string> => {
+    const externalId = externalIdParam || user.externalId;
+    if (!externalId) return 'unknown';
     
     setIsLoading(true);
     try {
-      const kycData = await checkKycStatus(user.externalId);
+      const kycData = await checkKycStatus(externalId);
       
-      const status = kycData.status || 'unknown';
+      // Usar complianceStatus si está disponible, sino usar status
+      const status = kycData.complianceStatus || kycData.status || 'unknown';
       
-      // Actualizar estado del usuario
+      // Actualizar estado del usuario con nombre si está disponible
       setUser(prev => ({
         ...prev,
-        kycStatus: status
+        kycStatus: status,
+        firstName: kycData.firstName && kycData.firstName !== 'pending' ? kycData.firstName : prev.firstName,
+        surname: kycData.surname && kycData.surname !== 'pending' ? kycData.surname : prev.surname,
       }));
       
       // Actualizar en localStorage
+      const currentUser = user.externalId ? user : { ...user, externalId };
       localStorage.setItem('auth', JSON.stringify({
-        externalId: user.externalId,
-        walletId: user.walletId,
-        walletAddress: user.walletAddress,
-        balance: user.balance,
-        tokens: user.tokens,
-        kycStatus: status
+        externalId: currentUser.externalId,
+        walletId: currentUser.walletId,
+        walletAddress: currentUser.walletAddress,
+        balance: currentUser.balance,
+        tokens: currentUser.tokens,
+        kycStatus: status,
+        firstName: kycData.firstName && kycData.firstName !== 'pending' ? kycData.firstName : currentUser.firstName,
+        surname: kycData.surname && kycData.surname !== 'pending' ? kycData.surname : currentUser.surname,
       }));
       
       return status;
@@ -209,7 +226,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     login,
     logout,
     refreshBalance,
-    checkKycStatus: checkUserKycStatus
+    checkKycStatus: () => checkUserKycStatus()
   };
 
   return (

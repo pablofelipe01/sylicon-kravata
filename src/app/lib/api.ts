@@ -54,18 +54,28 @@ async function fetchAPI<T>(
 
 /**
  * Obtiene el enlace del formulario KYC
+ * @param externalId - ID externo del usuario
+ * @param kycType - Tipo de KYC opcional: 'liveness' para el segundo paso
  */
-export async function getKycForm(externalId: string): Promise<KycFormResponse> {
-  console.log('Solicitando formulario KYC para:', externalId);
+export async function getKycForm(externalId: string, kycType?: 'liveness'): Promise<KycFormResponse> {
+  console.log('Solicitando formulario KYC para:', externalId, kycType ? `Tipo: ${kycType}` : 'Tipo: inicial');
   
   // Validación del parámetro
   if (!externalId || externalId.trim() === '') {
     throw new Error('externalId is required');
   }
   
+  // Construir el body de la petición
+  const requestBody: unknown = { externalId: externalId.trim() };
+  
+  // Añadir kycType solo si es 'liveness'
+  if (kycType === 'liveness') {
+    requestBody.kycType = 'liveness';
+  }
+  
   return fetchAPI<KycFormResponse>('/api/kravata', {
     method: 'POST',
-    body: JSON.stringify({ externalId: externalId.trim() }),
+    body: JSON.stringify(requestBody),
   });
 }
 
