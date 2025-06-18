@@ -160,8 +160,8 @@ export default function KycRegistrationPage() {
               <div className="bg-gray-800 p-4 rounded-lg">
                 <h3 className="font-semibold mb-2" style={{ color: '#71BB87' }}>🕐 Tiempo estimado</h3>
                 <p className="text-gray-300 text-sm">
-                  El proceso completo toma aproximadamente 10-15 minutos. 
-                  La aprobación puede tardar entre 15 minutos y 24 horas.
+                  El proceso completo toma aproximadamente 5-10 minutos. 
+                  
                 </p>
               </div>
             </div>
