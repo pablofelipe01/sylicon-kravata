@@ -138,64 +138,76 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
       
       {(touched || externalId.length > 0) && (
         <div className="mt-2 text-sm">
-          <p className="font-medium mb-1">Tu identificador debe cumplir:</p>
+          <p className="font-medium mb-1 text-gray-800 dark:text-gray-200">Tu identificador debe cumplir:</p>
           <ul className="space-y-1 pl-1">
             <li className="flex items-center">
-              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full 
+              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full font-bold
                 ${validations.minLength 
-                  ? 'bg-green-500/20 text-green-400' 
-                  : 'bg-red-500/20 text-red-400'}`}
+                  ? 'bg-green-600 text-white dark:bg-green-500/20 dark:text-green-400' 
+                  : 'bg-red-600 text-white dark:bg-red-500/20 dark:text-red-400'}`}
               >
                 {validations.minLength ? '✓' : '✗'}
               </span>
-              Mínimo 12 caracteres {externalId.length > 0 && `(${externalId.length}/12)`}
+              <span className="text-gray-700 dark:text-gray-300">
+                Mínimo 12 caracteres {externalId.length > 0 && `(${externalId.length}/12)`}
+              </span>
             </li>
             <li className="flex items-center">
-              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full 
+              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full font-bold
                 ${validations.hasUppercase 
-                  ? 'bg-green-500/20 text-green-400' 
-                  : 'bg-red-500/20 text-red-400'}`}
+                  ? 'bg-green-600 text-white dark:bg-green-500/20 dark:text-green-400' 
+                  : 'bg-red-600 text-white dark:bg-red-500/20 dark:text-red-400'}`}
               >
                 {validations.hasUppercase ? '✓' : '✗'}
               </span>
-              Al menos una letra mayúscula (A-Z)
+              <span className="text-gray-700 dark:text-gray-300">
+                Al menos una letra mayúscula (A-Z)
+              </span>
             </li>
             <li className="flex items-center">
-              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full 
+              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full font-bold
                 ${validations.hasLowercase 
-                  ? 'bg-green-500/20 text-green-400' 
-                  : 'bg-red-500/20 text-red-400'}`}
+                  ? 'bg-green-600 text-white dark:bg-green-500/20 dark:text-green-400' 
+                  : 'bg-red-600 text-white dark:bg-red-500/20 dark:text-red-400'}`}
               >
                 {validations.hasLowercase ? '✓' : '✗'}
               </span>
-              Al menos una letra minúscula (a-z)
+              <span className="text-gray-700 dark:text-gray-300">
+                Al menos una letra minúscula (a-z)
+              </span>
             </li>
             <li className="flex items-center">
-              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full 
+              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full font-bold
                 ${validations.hasNumber 
-                  ? 'bg-green-500/20 text-green-400' 
-                  : 'bg-red-500/20 text-red-400'}`}
+                  ? 'bg-green-600 text-white dark:bg-green-500/20 dark:text-green-400' 
+                  : 'bg-red-600 text-white dark:bg-red-500/20 dark:text-red-400'}`}
               >
                 {validations.hasNumber ? '✓' : '✗'}
               </span>
-              Al menos un número (0-9)
+              <span className="text-gray-700 dark:text-gray-300">
+                Al menos un número (0-9)
+              </span>
             </li>
             <li className="flex items-center">
-              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full 
+              <span className={`inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full font-bold
                 ${validations.hasSymbol 
-                  ? 'bg-green-500/20 text-green-400' 
-                  : 'bg-red-500/20 text-red-400'}`}
+                  ? 'bg-green-600 text-white dark:bg-green-500/20 dark:text-green-400' 
+                  : 'bg-red-600 text-white dark:bg-red-500/20 dark:text-red-400'}`}
               >
                 {validations.hasSymbol ? '✓' : '✗'}
               </span>
-              Al menos un símbolo especial (solo @, !, $, %, &, *)
+              <span className="text-gray-700 dark:text-gray-300">
+                Al menos un símbolo especial (solo @, !, $, %, &, *)
+              </span>
             </li>
             {!validations.hasValidChars && (
-              <li className="flex items-center text-red-400">
-                <span className="inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-red-500/20 text-red-400">
+              <li className="flex items-center">
+                <span className="inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-red-600 text-white dark:bg-red-500/20 dark:text-red-400 font-bold">
                   ✗
                 </span>
-                Solo se permiten letras, números y los símbolos @, !, $, %, &, *
+                <span className="text-red-700 dark:text-red-400">
+                  Solo se permiten letras, números y los símbolos @, !, $, %, &, *
+                </span>
               </li>
             )}
           </ul>
@@ -203,8 +215,8 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
       )}
       
       {isValid && externalId.length > 0 && (
-        <div className="mt-3 p-2 rounded-md bg-green-500/10 border border-green-500/20">
-          <p className="text-green-400 flex items-center">
+        <div className="mt-3 p-2 rounded-md bg-green-100 border border-green-300 dark:bg-green-500/10 dark:border-green-500/20">
+          <p className="text-green-800 dark:text-green-400 flex items-center font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
@@ -214,7 +226,7 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
       )}
       
       {/* Checkbox para aceptar términos y condiciones */}
-      <div className="mt-4 p-4 bg-gray-800 rounded-lg">
+      <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700">
         <div className="flex items-start">
           <input 
             type="checkbox" 
@@ -223,16 +235,16 @@ export default function KycForm({ onSuccess, onError }: KycFormProps) {
             onChange={(e) => setTermsAccepted(e.target.checked)}
             className="mt-1 mr-3"
           />
-          <label htmlFor="terms-checkbox" className="text-gray-300 text-sm">
-            Entiendo y acepto las condiciones establecidas en el <Link href="/contrato" className="text-blue-400 hover:underline" target="_blank">contrato de compra de tokens inmobiliarios</Link> y confirmo que he leído todos los términos antes de continuar con el proceso de verificación KYC.
+          <label htmlFor="terms-checkbox" className="text-gray-700 dark:text-gray-300 text-sm">
+            Entiendo y acepto las condiciones establecidas en el <Link href="/contrato" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline font-medium" target="_blank">contrato de compra de tokens inmobiliarios</Link> y confirmo que he leído todos los términos antes de continuar con el proceso de verificación KYC.
           </label>
         </div>
       </div>
       
       {/* Mensaje de advertencia cuando no se han aceptado los términos */}
       {!termsAccepted && externalId.length > 0 && isValid && (
-        <div className="mt-3 p-2 rounded-md bg-yellow-500/10 border border-yellow-500/20">
-          <p className="text-yellow-400 flex items-center">
+        <div className="mt-3 p-2 rounded-md bg-yellow-100 border border-yellow-300 dark:bg-yellow-500/10 dark:border-yellow-500/20">
+          <p className="text-yellow-800 dark:text-yellow-400 flex items-center font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
