@@ -238,7 +238,7 @@ export default function KycRegistrationPage() {
                       </li>
                       <li className="flex items-start">
                         <span className="mr-2">🔡</span>
-                        <span>Debe incluir mayúsculas, minúsculas, números y símbolos (@, !, $, %, &, *)</span>
+                        <span>Debe incluir mayúsculas, minúsculas, números y símbolos (@, !, $, %, *)</span>
                       </li>
                     </ul>
                   </div>
